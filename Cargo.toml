@@ -1,8 +1,11 @@
 [package]
-name = "grammatical_evolution"
-version = "0.1.0"
+name = "ruge"
+version= "0.0.1"
+authors = ["Mike Henning <Henning@fh-aachen.de>"]
 edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
