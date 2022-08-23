@@ -1,4 +1,6 @@
 mod grammar;
+mod mapping;
+mod interpreter;
 mod population;
 mod cycle;
 mod init;
