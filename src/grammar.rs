@@ -1,16 +1,11 @@
 use std::collections::HashMap;
 
-
-
-pub struct Grammar<'a>{
-   pub non_terminals: Vec<&'a str>,
-   pub terminals : Vec<&'a str>,
-   pub rules: HashMap<&'a str, Vec<Vec<&'a str>>>,
-   pub start: &'a str,
+pub struct Grammar<'a> {
+    pub non_terminals: Vec<&'a str>,
+    pub terminals: Vec<&'a str>,
+    pub rules: HashMap<&'a str, Vec<Vec<&'a str>>>,
+    pub start: &'a str,
 }
-
-
-
 
 //
 //

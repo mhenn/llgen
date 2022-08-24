@@ -1,103 +1,149 @@
 use crate::grammar::*;
 use std::collections::HashMap;
+use std::fmt;
 
-pub struct Interpreter<'a>{
-    pos: usize,
-    pub word: Vec<&'a str>,
-
+#[derive(Debug, PartialEq)]
+pub enum InterpreterError {
+    TooManyCodonsError,
+    TooFewCodonsError,
 }
 
+impl std::error::Error for InterpreterError {}
 
-fn handle_derivation<'a>( codon: &u8, key: &str, rules: &HashMap<&'a str, Vec<Vec<&'a str>>>) -> Option<Vec<&'a str>>{
-    let codon: usize = *codon as usize;
-    println!("key: {key}");
-    if let Some(value) = rules.get(&key){
-        let len: usize = value.len();
-        return Some(value[codon % len].clone())
-    } else{
-        None
-    }
-}
-
-
-impl<'a> Interpreter<'a>{
-
-    pub fn new(start: &'a str) -> Self{
-        Interpreter { pos: 0, word: vec!["<start>"]}// vec![start] }
-    }
-    fn get_new_nt_pos(&self, non_terminals: &Vec<&str>) -> usize{
-        let word = &self.word;
-        word.into_iter().fold((0,false), |mut acc, x|
-                              {
-                                  if acc.1{
-                                      return acc
-                                  }
-                                  if non_terminals.contains(&x) {
-                                      acc.1 = true;
-                                  } else {
-                                      acc.0 += 1;
-                                  }
-                                  acc
-                              }
-                             ).0
-    }
-
-
-    fn derive(&mut self,codon: u8, rules: &HashMap<&'a str, Vec<Vec<&'a str>>>) {
-        //let word = &self.word;
-        let pos = self.pos;
-        println!("{codon}");
-        if let Some(value) = &self.word.get(pos){
-            let derivative = handle_derivation(&codon, value, &rules);
-            if let Some(update) = derivative{
-                //self.word.remove(self.pos);
-                self.word.splice(pos.. &pos+1, update);
+impl fmt::Display for InterpreterError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            InterpreterError::TooFewCodonsError => {
+                write!(f, "To many Codons to build a valid tree!")
             }
-        } // Return Error
-    }
-
-    pub fn interpret(&mut self, chromosome:  Vec<u8>, rules: &HashMap<&'a str, Vec<Vec<&'a str>>>, non_terminals: &Vec<&str>) {//-> Result<String, InterpeterError>{
-        println!("NT: {:?}", rules);
-        for codon in chromosome {
-            println!("word: {:?}", self.word);
-            println!("pos: {}", self.pos);
-            self.derive(codon, rules);
-            self.pos = self.get_new_nt_pos(non_terminals);
+            InterpreterError::TooManyCodonsError => write!(f, "To few Codons to build valid tree!"),
         }
     }
 }
 
-    //TODO  currently not needed
-    //    //
-    //    use std::fmt;
-    //
-    //
-    //#[derive(Debug, Clone)]
-    //    struct InterpeterError;
-    //
-    //    impl fmt::Display for InterpeterError  {
-    //        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    //            write!(f, "Word couldn't be fully derived!")
-    //        }
-    //    }
-    //
-    //
-
-    fn get_test_grammar<'a>() -> Grammar<'a>{
-        let mut  map: HashMap<&str, Vec<Vec<&str>>> = HashMap::new();
-        map.insert("<start>", vec![vec!["<expr>","<op>","<expr>"]]);
-        map.insert("<expr>", vec![vec!["<term>","<op>","<term>"], vec!["<term>"]]);
-        map.insert("<op>", vec![vec!["+"], vec!["-"], vec!["/"], vec!["*"]]);
-        map.insert("<term>", vec![vec!["x"], vec!["0"]]);
-        Grammar { non_terminals: vec!["<start>", "<expr>", "<op>", "<term>"], terminals: vec!["+", "-", "/", "*", "x", "0"], rules: map, start:"" }
+fn handle_derivation<'a>(
+    codon: &u8,
+    key: &str,
+    rules: &HashMap<&'a str, Vec<Vec<&'a str>>>,
+) -> Option<Vec<&'a str>> {
+    let codon: usize = *codon as usize;
+    println!("key: {key}");
+    if let Some(value) = rules.get(&key) {
+        let len: usize = value.len();
+        return Some(value[codon % len].clone());
+    } else {
+        None
     }
+}
+
+fn get_new_nt_pos(word: &Vec<&str>, non_terminals: &Vec<&str>) -> Option<usize> {
+    let new_pos = word.into_iter().fold((0, false), |mut acc, x| {
+        if acc.1 {
+            return acc;
+        }
+        if non_terminals.contains(&x) {
+            acc.1 = true;
+        } else {
+            acc.0 += 1;
+        }
+        acc
+    });
+    if new_pos.1 {
+        Some(new_pos.0)
+    } else {
+        None
+    }
+}
+
+fn derive<'a>(
+    pos: usize,
+    word: &Vec<&'a str>,
+    codon: u8,
+    rules: &HashMap<&'a str, Vec<Vec<&'a str>>>,
+) -> Vec<&'a str> {
+    let mut word = word.clone();
+    println!("{codon}");
+    if let Some(value) = &word.get(pos) {
+        let derivative = handle_derivation(&codon, value, &rules);
+        if let Some(update) = derivative {
+            //self.word.remove(self.pos);
+            word.splice(pos..&pos + 1, update);
+        }
+    } // Return Error
+    word
+}
+
+pub fn interpret<'a>(
+    chromosome: Vec<u8>,
+    grammar: &'a Grammar,
+) -> Result<Vec<&'a str>, InterpreterError> {
+    //-> Result<String, InterpeterError>{
+    let mut pos: usize = 0;
+    let mut word: Vec<&str> = vec![grammar.start];
+    println!("{:?}", grammar.start);
+    for codon in chromosome {
+        println!("{:?}", word);
+        word = derive(pos, &word, codon, &grammar.rules);
+        if let Some(new_pos) = get_new_nt_pos(&word, &grammar.non_terminals) {
+            pos = new_pos;
+        } else {
+            return Err(InterpreterError::TooManyCodonsError);
+        }
+    }
+    Ok(word)
+}
+
+//TODO  currently not needed
+//
+
+fn get_test_grammar<'a>() -> Grammar<'a> {
+    let mut map: HashMap<&str, Vec<Vec<&str>>> = HashMap::new();
+    map.insert("<start>", vec![vec!["<expr>", "<op>", "<expr>"]]);
+    map.insert(
+        "<expr>",
+        vec![vec!["<term>", "<op>", "<term>"], vec!["<term>"]],
+    );
+    map.insert("<op>", vec![vec!["+"], vec!["-"], vec!["/"], vec!["*"]]);
+    map.insert("<term>", vec![vec!["x"], vec!["0"]]);
+    Grammar {
+        non_terminals: vec!["<start>", "<expr>", "<op>", "<term>"],
+        terminals: vec!["+", "-", "/", "*", "x", "0"],
+        rules: map,
+        start: "<start>",
+    }
+}
 
 #[test]
-    fn interpreting_standard_grammar(){
-        let grammar = get_test_grammar();
-        let mut inter = Interpreter::new(grammar.start );
-        inter.interpret(vec![13,4,9,33,16,14,3,28], &grammar.rules, &grammar.non_terminals);
-        println!("{:?}",inter.word);
-        assert!(false);
-    }
+fn interpreting_standard_grammar_too_long_chromosome() {
+    let grammar = get_test_grammar();
+    let chromosome = vec![13, 4, 9, 33, 16, 14, 3, 28, 12];
+    let ret = interpret(chromosome, &grammar);
+    assert!(ret.is_err());
+    assert!(matches!(
+        ret.unwrap_err(),
+        InterpreterError::TooManyCodonsError
+    ));
+}
 
+#[test]
+fn interpreting_standard_grammar_too_short_chromosome() {
+    let grammar = get_test_grammar();
+    let chromosome = vec![13, 4, 9, 33, 16, 14, 3];
+    let ret = interpret(chromosome, &grammar);
+    assert!(ret.is_err());
+    //    assert!(matches!(
+    //            ret.unwrap_err(),
+    //            InterpreterError::TooFewCodonsError
+    //            ));
+}
+
+#[test]
+fn interpreting_standard_grammar() {
+    let grammar = get_test_grammar();
+    let chromosome = vec![13, 4, 9, 33, 16, 14, 3, 28];
+    let ret = interpret(chromosome, &grammar);
+    //assert!(ret.is_ok());
+    println!("{:?}", ret);
+    assert!(2 == 1);
+    //assert!(ret.unwrap() == vec!["0", "-", "x", "/", "x"]);
+}
