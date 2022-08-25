@@ -66,7 +66,6 @@ fn derive<'a>(
     if let Some(value) = &word.get(pos) {
         let derivative = handle_derivation(&codon, value, &rules);
         if let Some(update) = derivative {
-            //self.word.remove(self.pos);
             word.splice(pos..&pos + 1, update);
         }
     } // Return Error
@@ -83,18 +82,20 @@ pub fn interpret<'a>(
     println!("{:?}", grammar.start);
     for codon in chromosome {
         println!("{:?}", word);
-        word = derive(pos, &word, codon, &grammar.rules);
         if let Some(new_pos) = get_new_nt_pos(&word, &grammar.non_terminals) {
             pos = new_pos;
         } else {
             return Err(InterpreterError::TooManyCodonsError);
         }
+        word = derive(pos, &word, codon, &grammar.rules);
     }
+
+    if let Some(new_pos) = get_new_nt_pos(&word, &grammar.non_terminals) {
+        return Err(InterpreterError::TooFewCodonsError);
+    }
+
     Ok(word)
 }
-
-//TODO  currently not needed
-//
 
 fn get_test_grammar<'a>() -> Grammar<'a> {
     let mut map: HashMap<&str, Vec<Vec<&str>>> = HashMap::new();
@@ -131,10 +132,10 @@ fn interpreting_standard_grammar_too_short_chromosome() {
     let chromosome = vec![13, 4, 9, 33, 16, 14, 3];
     let ret = interpret(chromosome, &grammar);
     assert!(ret.is_err());
-    //    assert!(matches!(
-    //            ret.unwrap_err(),
-    //            InterpreterError::TooFewCodonsError
-    //            ));
+    assert!(matches!(
+        ret.unwrap_err(),
+        InterpreterError::TooFewCodonsError
+    ));
 }
 
 #[test]
@@ -142,8 +143,6 @@ fn interpreting_standard_grammar() {
     let grammar = get_test_grammar();
     let chromosome = vec![13, 4, 9, 33, 16, 14, 3, 28];
     let ret = interpret(chromosome, &grammar);
-    //assert!(ret.is_ok());
-    println!("{:?}", ret);
-    assert!(2 == 1);
-    //assert!(ret.unwrap() == vec!["0", "-", "x", "/", "x"]);
+    assert!(ret.is_ok());
+    assert!(ret.unwrap() == vec!["0", "-", "x", "/", "x"]);
 }

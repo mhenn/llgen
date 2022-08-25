@@ -18,19 +18,20 @@ fn generate_rnd_chromosomes(min: i32, max: i32, size: i32) -> Vec<Vec<u8>> {
         .collect()
 }
 
-fn generate_individuals(chromosomes: Vec<Vec<u8>>) -> Vec<Individual> {
+fn generate_individuals<'a>(chromosomes: Vec<Vec<u8>>) -> Vec<Individual<'a>> {
     chromosomes
         .into_iter()
         .map(|chromosome| Individual {
             chromosome,
             fitness: 0.0,
+            word: vec![],
         })
         .collect()
 }
 
 //min: chromosome size min
 //max: same just max
-pub fn rnd(min: i32, max: i32, pop_size: i32) -> Generation {
+pub fn rnd<'a>(min: i32, max: i32, pop_size: i32) -> Generation<'a> {
     Generation {
         individuals: generate_individuals(generate_rnd_chromosomes(min, max, pop_size)),
         count: 0,
