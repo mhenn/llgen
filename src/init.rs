@@ -34,6 +34,7 @@ fn generate_individuals<'a>(chromosomes: Vec<Vec<u8>>) -> Vec<Individual<'a>> {
 pub fn rnd<'a>(min: i32, max: i32, pop_size: i32) -> Generation<'a> {
     Generation {
         individuals: generate_individuals(generate_rnd_chromosomes(min, max, pop_size)),
+        pop_size,
         count: 0,
     }
 }
