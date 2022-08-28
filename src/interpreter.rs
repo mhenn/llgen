@@ -73,11 +73,11 @@ fn derive<'a>(
 }
 
 pub fn interpret<'a>(
-    chromosome: Vec<u8>,
+    chromosome: &Vec<u8>,
     grammar: &'a Grammar,
 ) -> Result<Vec<&'a str>, InterpreterError> {
     //-> Result<String, InterpeterError>{
-    let mut pos: usize = 0;
+    let mut pos;
     let mut word: Vec<&str> = vec![grammar.start];
     println!("{:?}", grammar.start);
     for codon in chromosome {
@@ -87,10 +87,10 @@ pub fn interpret<'a>(
         } else {
             return Err(InterpreterError::TooManyCodonsError);
         }
-        word = derive(pos, &word, codon, &grammar.rules);
+        word = derive(pos, &word, *codon, &grammar.rules);
     }
 
-    if let Some(new_pos) = get_new_nt_pos(&word, &grammar.non_terminals) {
+    if let Some(_) = get_new_nt_pos(&word, &grammar.non_terminals) {
         return Err(InterpreterError::TooFewCodonsError);
     }
 
@@ -118,7 +118,7 @@ fn get_test_grammar<'a>() -> Grammar<'a> {
 fn interpreting_standard_grammar_too_long_chromosome() {
     let grammar = get_test_grammar();
     let chromosome = vec![13, 4, 9, 33, 16, 14, 3, 28, 12];
-    let ret = interpret(chromosome, &grammar);
+    let ret = interpret(&chromosome, &grammar);
     assert!(ret.is_err());
     assert!(matches!(
         ret.unwrap_err(),
@@ -130,7 +130,7 @@ fn interpreting_standard_grammar_too_long_chromosome() {
 fn interpreting_standard_grammar_too_short_chromosome() {
     let grammar = get_test_grammar();
     let chromosome = vec![13, 4, 9, 33, 16, 14, 3];
-    let ret = interpret(chromosome, &grammar);
+    let ret = interpret(&chromosome, &grammar);
     assert!(ret.is_err());
     assert!(matches!(
         ret.unwrap_err(),
@@ -142,7 +142,7 @@ fn interpreting_standard_grammar_too_short_chromosome() {
 fn interpreting_standard_grammar() {
     let grammar = get_test_grammar();
     let chromosome = vec![13, 4, 9, 33, 16, 14, 3, 28];
-    let ret = interpret(chromosome, &grammar);
+    let ret = interpret(&chromosome, &grammar);
     assert!(ret.is_ok());
     assert!(ret.unwrap() == vec!["0", "-", "x", "/", "x"]);
 }
