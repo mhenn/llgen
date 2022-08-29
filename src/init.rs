@@ -41,14 +41,7 @@ pub fn rnd<'a>(min: i32, max: i32, pop_size: usize) -> Generation<'a> {
 /////////////////////////////
 ///
 
-
-
-
-pub fn ptc2(tree_size:usize, tree_depth: usize, pop_size: usize){
-
-}
-
-
+pub fn ptc2(tree_size: usize, tree_depth: usize, pop_size: usize) {}
 
 #[test]
 fn chromosomes_rnd() {

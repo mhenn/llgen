@@ -21,6 +21,7 @@ pub fn evolution_cycle<'a>(
     let mut pop = Generation {
         ..Default::default()
     };
+
     pop.populate(init, pop_size);
     pop.derive_instances(derivation, &grammar);
     evaluate(&pop);
@@ -64,16 +65,19 @@ pub fn combine<'a>(
         let i1 = &inds[rand1];
         let i2 = &inds[rand2];
         let min = std::cmp::min(i1.chromosome.len(), i2.chromosome.len());
-        println!("{}", min);
+        //println!("{}", min);
         for _ in 0..1 {
-
             if let Ok(ind) = standard_one_point_crossover(min, &i1, &i2, grammar) {
                 new_inds.push(ind);
             }
             if let Ok(ind) = standard_one_point_crossover(min, &i2, &i1, grammar) {
                 new_inds.push(ind);
             }
-            new_inds.push(Individual { chromosome: vec![], fitness: 0.0, word: vec![] });
+            new_inds.push(Individual {
+                chromosome: vec![],
+                fitness: 0.0,
+                word: vec![],
+            });
         }
     }
     new_inds
@@ -124,6 +128,6 @@ fn combination() {
         })
         .collect();
     inds = combine(&inds, size, &grammar);
-    println!("{:?}", inds);
-    assert!(false);
+    // println!("{:?}", inds);
+    //assert!(false);
 }

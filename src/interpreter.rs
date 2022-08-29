@@ -96,24 +96,6 @@ pub fn interpret<'a>(
 
     Ok(word)
 }
-
-fn get_test_grammar<'a>() -> Grammar<'a> {
-    let mut map: HashMap<&str, Vec<Vec<&str>>> = HashMap::new();
-    map.insert("<start>", vec![vec!["<expr>", "<op>", "<expr>"]]);
-    map.insert(
-        "<expr>",
-        vec![vec!["<term>", "<op>", "<term>"], vec!["<term>"]],
-    );
-    map.insert("<op>", vec![vec!["+"], vec!["-"], vec!["/"], vec!["*"]]);
-    map.insert("<term>", vec![vec!["x"], vec!["0"]]);
-    Grammar {
-        non_terminals: vec!["<start>", "<expr>", "<op>", "<term>"],
-        terminals: vec!["+", "-", "/", "*", "x", "0"],
-        rules: map,
-        start: "<start>",
-    }
-}
-
 #[test]
 fn interpreting_standard_grammar_too_long_chromosome() {
     let grammar = get_test_grammar();
