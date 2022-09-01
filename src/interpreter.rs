@@ -30,18 +30,18 @@ fn handle_derivation<'a>(
     println!("key: {key}");
     if let Some(value) = rules.get(&key) {
         let len: usize = value.len();
-        return Some(value[codon % len].clone());
+        Some(value[codon % len].clone())
     } else {
         None
     }
 }
 
 fn get_new_nt_pos(word: &Vec<&str>, non_terminals: &Vec<&str>) -> Option<usize> {
-    let new_pos = word.into_iter().fold((0, false), |mut acc, x| {
+    let new_pos = word.iter().fold((0, false), |mut acc, x| {
         if acc.1 {
             return acc;
         }
-        if non_terminals.contains(&x) {
+        if non_terminals.contains(x) {
             acc.1 = true;
         } else {
             acc.0 += 1;
@@ -90,7 +90,7 @@ pub fn interpret<'a>(
         word = derive(pos, &word, *codon, &grammar.rules);
     }
 
-    if let Some(_) = get_new_nt_pos(&word, &grammar.non_terminals) {
+    if get_new_nt_pos(&word, &grammar.non_terminals).is_some() {
         return Err(InterpreterError::TooFewCodonsError);
     }
 

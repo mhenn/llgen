@@ -1,8 +1,9 @@
 use std::{
     collections::{HashMap, VecDeque},
-    error, fmt,
-    thread::AccessError,
+    error, fmt, hash::Hash,
 };
+
+use crate::tree::*;
 
 pub struct Grammar<'a> {
     pub non_terminals: Vec<&'a str>,
@@ -17,7 +18,7 @@ pub enum NodeType {
 }
 
 #[derive(Debug)]
-struct NoEntryError;
+pub struct NoEntryError;
 
 impl fmt::Display for NoEntryError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -26,14 +27,6 @@ impl fmt::Display for NoEntryError {
 }
 
 impl error::Error for NoEntryError {}
-
-pub struct Node<'a> {
-    pub value: &'a str,
-    //pub parent: Option<Box<Node<'a>>>,
-    pub visited: bool,
-    pub typ: Option<NodeType>,
-    pub path: Vec<&'a str>,
-}
 
 impl<'a> Grammar<'a> {
     pub fn check_membership(&self, value: &'a str) -> Result<NodeType, NoEntryError> {
@@ -45,42 +38,33 @@ impl<'a> Grammar<'a> {
         Err(NoEntryError)
     }
 
-    pub fn path_to_terminal(&self, value: &'a str) -> Result<Vec<&'a str>, NoEntryError> {
-        let mut queue: VecDeque<Node> = VecDeque::new();
-        let typ = self.check_membership(value)?;
-        let mut el: Node;
-        queue.push_front(Node {
-            value,
-            visited: false,
-            typ: Some(typ),
-            path: vec![],
-        });
-        while let Some(elem) = queue.pop_back() {
-            println!("{}", elem.value);
-            let mut path = elem.path.clone();
-            path.push(elem.value.clone());
-            if let Some(rules) = self.rules.get(elem.value) {
-                for rule in rules {
-                    for child in rule {
-                        let typ = self.check_membership(child);
-                        if typ.is_err() {
-                            println!("{:?}", child);
-                        }
-
-                        queue.push_front(Node {
-                            value: child,
-                            visited: false,
-                            typ: Some(typ.unwrap()),
-                            path: path.clone(),
-                        });
-                    }
-                }
-            } else {
-            }
+    fn add_rules_to_queue(&self, value: &'a str, queue: &mut VecDeque<(u8,Vec<&'a str>)>){
+        let i:u8 = 0;
+        for rule in self.rules.get(value).unwrap(){
+            queue.push_front((i, rule.clone()))
         }
-        Err(NoEntryError)
     }
+
+    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
+        if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
+            return word.iter().position(|x| x == nt)
+        }
+    None
+    }
+
+    pub fn fill_word(&self, word: Vec<&str>){
+
+
+
+    }
+
+
+// build an "infinite" tree, the value is the resulting word after the rule execution
+
 }
+
+
+////////////// TEST STUFF //////////////////
 
 pub fn get_test_grammar<'a>() -> Grammar<'a> {
     let mut map: HashMap<&str, Vec<Vec<&str>>> = HashMap::new();
@@ -99,24 +83,33 @@ pub fn get_test_grammar<'a>() -> Grammar<'a> {
     }
 }
 
-#[test]
-fn bfs_grammar() {
-    let grammar = get_test_grammar();
-    let path = grammar.path_to_terminal("<start>");
-    print!("{:?}", path);
-    assert!(path.is_ok());
+pub fn get_bt_grammar<'a>() -> Grammar<'a> {
+    let mut map = HashMap::new();
+    map.insert("ROOT", vec![vec!["<root>", "NL", "</root>"]]);
+    map.insert("NL", vec![vec!["LOCF", "NL"], vec!["LOCF"]]);
+    map.insert("LOCF", vec![vec!["L"], vec!["CF"]]);
+    map.insert("L", vec![vec!["ACT"]]);
+    map.insert(
+        "CF",
+        vec![
+            vec!["<seq>", "NL", "</seq>"],
+            vec!["<fall>", "NL", "</fall>"],
+            vec!["<par>", "NL", "</par>"],
+            vec!["<pol>", "LOCF", "</pol>"],
+        ],
+    );
+    map.insert("ACT", vec![vec!["pickup"], vec!["putdown"]]);
+
+    Grammar {
+        non_terminals: vec!["ROOT","NL","LOCF","L","CF","ACT"],
+        terminals: vec!["<root>", "<seq>", "<fall>", "<par>", "<pol>", "</root>", "</seq>", "</fall>", "</par>", "</pol>","pickup", "putdown"],
+        rules: map,
+        start: "ROOT",
+    }
 }
 
-//
-//
-//#[test]
-//fn calculate_rule_count_vals(){
-//    let mut map: HashMap<String, Vec<Vec<String>>> = HashMap::new();
-//    map.insert(String::from("a") , vec![vec![String::from("a")], vec![String::from("Giraffe")]]);
-//    map.insert(String::from("b") , vec![ vec![String::from("Giraffe")]]);
-//    map.insert(String::from("c") , vec![vec![String::from("a")], vec![String::from("Giraffe")], vec![String::from("Girfe")], vec![String::from("Giraff")]]);
-//    let g = Grammar::new(vec![], vec![], map.clone(), String::from("Affe"));
-//    for (x,&y) in g.rule_count.iter(){
-//        assert!(y == map.get(x).unwrap().len())
-//    }
-//}
+
+//use std::time::{Duration, Instant};
+//let start = Instant::now();
+//let duration = start.elapsed();
+//println!("Time elapsed in expensive_function() is: {:?}", duration);

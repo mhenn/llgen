@@ -1,5 +1,5 @@
 use crate::{
-    grammar::Grammar,
+    grammar::*,
     init::*,
     interpreter::{interpret, InterpreterError},
     population::{Generation, Individual},
@@ -21,6 +21,7 @@ pub fn evolution_cycle<'a>(
     let mut pop = Generation {
         ..Default::default()
     };
+
 
     pop.populate(init, pop_size);
     pop.derive_instances(derivation, &grammar);
@@ -84,32 +85,6 @@ pub fn combine<'a>(
 }
 
 pub fn evaluate<'a>(_gen: &'a Generation) {}
-
-pub fn get_grammar<'a>() -> Grammar<'a> {
-    let mut map = HashMap::new();
-    map.insert("ROOT", vec![vec!["<root>", "", "</root>"]]);
-    map.insert("NL", vec![vec!["LOCF", "NL"], vec!["LOCF"]]);
-    map.insert("LOCF", vec![vec!["L"], vec!["CF"]]);
-    map.insert("L", vec![vec!["ACT"]]);
-    map.insert(
-        "CF",
-        vec![
-            vec!["<seq>", "NL", "</seq>"],
-            vec!["<fall>", "NL", "</fall>"],
-            vec!["<par>", "NL", "</par>"],
-            vec!["<pol>", "LOCF", "</pol>"],
-        ],
-    );
-    map.insert("ACT", vec![vec!["pickup"], vec!["putdown"]]);
-
-    Grammar {
-        non_terminals: vec![""],
-        terminals: vec![],
-        rules: map,
-        start: "ROOT",
-    }
-}
-
 pub fn crop<'a>(pop_fitness: f64, ind: &Individual) -> bool {
     ind.fitness > pop_fitness
 }
@@ -117,7 +92,7 @@ pub fn crop<'a>(pop_fitness: f64, ind: &Individual) -> bool {
 #[test]
 fn combination() {
     let size: usize = 20;
-    let grammar = get_grammar();
+    let grammar = get_bt_grammar();
     let mut inds = generate_individuals(generate_rnd_chromosomes(2, 10, size));
     inds = inds
         .into_iter()

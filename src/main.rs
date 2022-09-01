@@ -4,12 +4,7 @@ mod init;
 mod interpreter;
 mod mapping;
 mod population;
-
-use crate::cycle::*;
-use crate::grammar::*;
-use crate::init::*;
-use crate::interpreter::*;
-use crate::population::*;
+mod tree;
 
 fn main() {
 
