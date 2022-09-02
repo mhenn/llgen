@@ -80,7 +80,7 @@ pub fn get_test_grammar<'a>() -> Grammar<'a> {
 pub fn get_bt_grammar<'a>() -> Grammar<'a> {
     let mut map = HashMap::new();
     map.insert("ROOT", vec![vec!["<root>", "NL", "</root>"]]);
-    map.insert("NL", vec![vec!["LOCF"],vec!["LOCF", "NL"], ]);
+    map.insert("NL", vec![vec!["LOCF"], vec!["LOCF", "NL"]]);
     map.insert("LOCF", vec![vec!["L"], vec!["CF"]]);
     map.insert("L", vec![vec!["ACT"]]);
     map.insert(

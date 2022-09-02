@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-
+use rand::{distributions::Uniform, Rng};
 use crate::grammar::*;
 
 #[derive(Clone)]
@@ -28,19 +28,47 @@ fn only_terminals(grammar: &Grammar, ls: &Vec<&str>) -> bool {
     !contains
 }
 
-pub fn smallest_word<'a>(
+pub fn grow_full<'a>(
+    amount: usize,
+    min: usize,
+    max: usize,
     grammar: &'a Grammar,
-    word: Vec<&'a str>,
-) -> Result<Vec<&'a str>, NoEntryError> {
+) -> Vec<(Vec<usize>, Vec<&'a str>)> {
+    let starting_symbol = <&str>::clone(&grammar.start);
+    let mut words: Vec<(Vec<usize>, Vec<&str>)> = vec![];
+    for _ in 0..amount {
+        let min_val = rand::thread_rng().gen_range(min..=max);
+        if let Some(val) = tree_growth(grammar, (vec![], vec![starting_symbol]), grow_cond, min_val) {
+            words.push(tree_growth(grammar, val, full_cond, min).unwrap())
+        }
+    }
+    words
+}
+
+pub fn grow_cond<'a>(word: &Vec<&str>, position: Option<usize>, min: usize) -> bool {
+    word.len() > min
+}
+
+pub fn full_cond(word: &Vec<&str>, position: Option<usize>, min: usize) -> bool {
+    position.is_none()
+}
+
+pub fn tree_growth<'a>(
+    grammar: &'a Grammar,
+    tup: (Vec<usize>, Vec<&'a str>),
+    condition: fn(&Vec<&str>, Option<usize>, usize) -> bool,
+    min: usize,
+) -> Option<(Vec<usize>, Vec<&'a str>)> {
     let mut queue: VecDeque<(Vec<usize>, Vec<&str>)> = VecDeque::new();
-    queue.push_front((vec![], word));
+    queue.push_front(tup);
 
-
-    while let Some((mut decisions,  current_word)) = queue.pop_back() {
-        println!("{:?}", current_word);
+    while let Some((decisions, current_word)) = queue.pop_back() {
         let pos = grammar.get_next_nt_in(&current_word);
-        if pos.is_none() {
-            return Ok(current_word);
+        if condition(&current_word, pos, min) {
+            return Some((decisions, current_word));
+        }
+        if pos.is_none(){
+            continue;
         }
         let pos = pos.unwrap();
         for (i, rule) in grammar
@@ -51,36 +79,46 @@ pub fn smallest_word<'a>(
             .enumerate()
         {
             let mut new_word = current_word.clone();
-            new_word.splice(pos..(pos+1), rule[..].to_vec());
-            decisions.push(i);
-            queue.push_front((decisions.clone(), new_word));
+            let mut new_decisions = decisions.clone();
+            new_word.splice(pos..(pos + 1), rule[..].to_vec());
+            new_decisions.push(i);
+            queue.push_front((new_decisions, new_word));
         }
     }
-            println!("WHAAAT");
-
-    Err(NoEntryError)
+    None
 }
 
 #[test]
-fn word_with_just_terminals(){
-    let word = vec!["<root>","pickup","</root>"];
+fn generate_words() {
+
+    let word = vec!["<root>", "NL", "</root>"];
+    let grammar = get_bt_grammar();
+    let res = grow_full(4, 10, 20, &grammar);
+
+    println!("{:?}", res);
+    assert!(false);
+
+}
+
+#[test]
+fn word_with_just_terminals() {
+    let word = vec!["<root>", "pickup", "</root>"];
     let grammar = get_bt_grammar();
     assert!(only_terminals(&grammar, &word));
 }
 
 #[test]
-fn words_with_non_terminals(){
+fn words_with_non_terminals() {
     let grammar = get_bt_grammar();
-    let word = vec!["<root>","NL","</root>"];
+    let word = vec!["<root>", "NL", "</root>"];
 
-    assert_eq!(only_terminals(&grammar, &word), false);
+    assert!(!only_terminals(&grammar, &word));
 }
 
 #[test]
-fn smallest_word_from_start() {
-    let word = vec!["<root>","NL" ,"</root>"];
+fn full_from_start() {
+    let word = vec!["<root>", "NL", "</root>"];
     let grammar = get_bt_grammar();
-
-    let res = smallest_word(&grammar, word);
-     assert!(res.is_ok());
+    let res = tree_growth(&grammar, (vec![], word), full_cond, 1);
+    assert!(res.is_some());
 }
