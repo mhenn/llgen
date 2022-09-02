@@ -22,7 +22,6 @@ pub fn evolution_cycle<'a>(
         ..Default::default()
     };
 
-
     pop.populate(init, pop_size);
     pop.derive_instances(derivation, &grammar);
     evaluate(&pop);
@@ -87,22 +86,4 @@ pub fn combine<'a>(
 pub fn evaluate<'a>(_gen: &'a Generation) {}
 pub fn crop<'a>(pop_fitness: f64, ind: &Individual) -> bool {
     ind.fitness > pop_fitness
-}
-
-#[test]
-fn combination() {
-    let size: usize = 20;
-    let grammar = get_bt_grammar();
-    let mut inds = generate_individuals(generate_rnd_chromosomes(2, 10, size));
-    inds = inds
-        .into_iter()
-        .map(|x| Individual {
-            chromosome: x.chromosome,
-            fitness: rand::thread_rng().gen(),
-            word: vec![],
-        })
-        .collect();
-    inds = combine(&inds, size, &grammar);
-    // println!("{:?}", inds);
-    //assert!(false);
 }

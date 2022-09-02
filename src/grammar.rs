@@ -1,6 +1,7 @@
 use std::{
     collections::{HashMap, VecDeque},
-    error, fmt, hash::Hash,
+    error, fmt,
+    hash::Hash,
 };
 
 use crate::tree::*;
@@ -38,31 +39,24 @@ impl<'a> Grammar<'a> {
         Err(NoEntryError)
     }
 
-    fn add_rules_to_queue(&self, value: &'a str, queue: &mut VecDeque<(u8,Vec<&'a str>)>){
-        let i:u8 = 0;
-        for rule in self.rules.get(value).unwrap(){
+    fn add_rules_to_queue(&self, value: &'a str, queue: &mut VecDeque<(u8, Vec<&'a str>)>) {
+        let i: u8 = 0;
+        for rule in self.rules.get(value).unwrap() {
             queue.push_front((i, rule.clone()))
         }
     }
 
     pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
         if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
-            return word.iter().position(|x| x == nt)
+            return word.iter().position(|x| x == nt);
         }
-    None
+        None
     }
 
-    pub fn fill_word(&self, word: Vec<&str>){
+    pub fn fill_word(&self, word: Vec<&str>) {}
 
-
-
-    }
-
-
-// build an "infinite" tree, the value is the resulting word after the rule execution
-
+    // build an "infinite" tree, the value is the resulting word after the rule execution
 }
-
 
 ////////////// TEST STUFF //////////////////
 
@@ -86,7 +80,7 @@ pub fn get_test_grammar<'a>() -> Grammar<'a> {
 pub fn get_bt_grammar<'a>() -> Grammar<'a> {
     let mut map = HashMap::new();
     map.insert("ROOT", vec![vec!["<root>", "NL", "</root>"]]);
-    map.insert("NL", vec![vec!["LOCF", "NL"], vec!["LOCF"]]);
+    map.insert("NL", vec![vec!["LOCF"],vec!["LOCF", "NL"], ]);
     map.insert("LOCF", vec![vec!["L"], vec!["CF"]]);
     map.insert("L", vec![vec!["ACT"]]);
     map.insert(
@@ -101,13 +95,15 @@ pub fn get_bt_grammar<'a>() -> Grammar<'a> {
     map.insert("ACT", vec![vec!["pickup"], vec!["putdown"]]);
 
     Grammar {
-        non_terminals: vec!["ROOT","NL","LOCF","L","CF","ACT"],
-        terminals: vec!["<root>", "<seq>", "<fall>", "<par>", "<pol>", "</root>", "</seq>", "</fall>", "</par>", "</pol>","pickup", "putdown"],
+        non_terminals: vec!["ROOT", "NL", "LOCF", "L", "CF", "ACT"],
+        terminals: vec![
+            "<root>", "<seq>", "<fall>", "<par>", "<pol>", "</root>", "</seq>", "</fall>",
+            "</par>", "</pol>", "pickup", "putdown",
+        ],
         rules: map,
         start: "ROOT",
     }
 }
-
 
 //use std::time::{Duration, Instant};
 //let start = Instant::now();
