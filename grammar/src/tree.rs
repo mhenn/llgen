@@ -1,3 +1,5 @@
+#![allow(dead_code, unused)]
+
 use std::collections::VecDeque;
 use rand::{distributions::Uniform, Rng};
 use crate::grammar::*;
@@ -24,7 +26,7 @@ impl<T> GNode<T> {
 fn only_terminals(grammar: &Grammar, ls: &Vec<&str>) -> bool {
     let contains = ls
         .iter()
-        .any(|x| matches!(grammar.check_membership(x), Ok(NodeType::NonTerminal)));
+        .any(|x| grammar.non_terms.get(x).is_some());//matches!(grammar.check_membership(x), Ok(NodeType::NonTerminal)));
     !contains
 }
 
@@ -88,17 +90,17 @@ pub fn tree_growth<'a>(
     None
 }
 
-#[test]
-fn generate_words() {
-
-    let word = vec!["<root>", "NL", "</root>"];
-    let grammar = get_bt_grammar();
-    let res = grow_full(4, 10, 20, &grammar);
-
-    println!("{:?}", res);
-    assert!(false);
-
-}
+//#[test]
+//fn generate_words() {
+//
+//    let word = vec!["<root>", "NL", "</root>"];
+//    let grammar = get_bt_grammar();
+//    let res = grow_full(1, 20, 30, &grammar);
+//
+//    println!("{:?}", res);
+//    assert!(false);
+//
+//}
 
 #[test]
 fn word_with_just_terminals() {
@@ -120,5 +122,5 @@ fn full_from_start() {
     let word = vec!["<root>", "NL", "</root>"];
     let grammar = get_bt_grammar();
     let res = tree_growth(&grammar, (vec![], word), full_cond, 1);
-    assert!(res.is_some());
+   assert!(res.is_some());
 }

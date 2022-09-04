@@ -1,0 +1,10 @@
+[package]
+name = "ruge"
+version= "0.0.1"
+authors = ["Mike Henning <Henning@fh-aachen.de>"]
+edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
+
+

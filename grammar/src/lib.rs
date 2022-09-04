@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub mod cycle;
 pub mod grammar;
 pub mod init;

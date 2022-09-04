@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use crate::population::*;
 use rand::{distributions::Uniform, Rng};
 

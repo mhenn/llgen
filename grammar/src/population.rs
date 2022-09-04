@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use crate::{grammar::Grammar, interpreter::InterpreterError};
 
 #[derive(Default, Debug, Clone)]

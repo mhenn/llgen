@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use std::{
     collections::{HashMap, VecDeque},
     error, fmt,
@@ -11,6 +12,8 @@ pub struct Grammar<'a> {
     pub terminals: Vec<&'a str>,
     pub rules: HashMap<&'a str, Vec<Vec<&'a str>>>,
     pub start: &'a str,
+    pub non_terms: HashMap<&'a str, bool>,
+
 }
 
 pub enum NodeType {
@@ -46,12 +49,21 @@ impl<'a> Grammar<'a> {
         }
     }
 
-    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
-        if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
-            return word.iter().position(|x| x == nt);
+      pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
+        for (i,el) in word.iter().enumerate(){
+           if self.non_terms.get(el).is_some(){
+                return Some(i);
+           }
         }
         None
-    }
+      }
+
+//    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
+//        if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
+//            return word.iter().position(|x| x == nt);
+//        }
+//        None
+//    }
 
     pub fn fill_word(&self, word: Vec<&str>) {}
 
@@ -74,6 +86,7 @@ pub fn get_test_grammar<'a>() -> Grammar<'a> {
         terminals: vec!["+", "-", "/", "*", "x", "0"],
         rules: map,
         start: "<start>",
+        non_terms: HashMap::new(),
     }
 }
 
@@ -82,17 +95,26 @@ pub fn get_bt_grammar<'a>() -> Grammar<'a> {
     map.insert("ROOT", vec![vec!["<root>", "NL", "</root>"]]);
     map.insert("NL", vec![vec!["LOCF"], vec!["LOCF", "NL"]]);
     map.insert("LOCF", vec![vec!["L"], vec!["CF"]]);
-    map.insert("L", vec![vec!["ACT"]]);
+    map.insert("L", vec![vec!["pickup"]]);
     map.insert(
         "CF",
         vec![
+            vec!["<pol>", "LOCF", "</pol>"],
             vec!["<seq>", "NL", "</seq>"],
             vec!["<fall>", "NL", "</fall>"],
             vec!["<par>", "NL", "</par>"],
-            vec!["<pol>", "LOCF", "</pol>"],
         ],
     );
     map.insert("ACT", vec![vec!["pickup"], vec!["putdown"]]);
+
+
+    let mut nt = HashMap::new();
+    nt.insert("ROOT", true);
+    nt.insert("NL", true);
+    nt.insert("LOCF", true);
+    nt.insert("L", true);
+    nt.insert("CF", true);
+    nt.insert("ACT", true);
 
     Grammar {
         non_terminals: vec!["ROOT", "NL", "LOCF", "L", "CF", "ACT"],
@@ -102,6 +124,7 @@ pub fn get_bt_grammar<'a>() -> Grammar<'a> {
         ],
         rules: map,
         start: "ROOT",
+        non_terms: nt,
     }
 }
 

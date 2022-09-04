@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use crate::grammar::*;
 use std::collections::HashMap;
 use std::fmt;
