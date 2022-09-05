@@ -58,7 +58,7 @@ pub fn run_iter(){
 
     let seq = get_pruefer_seq(500);
     let n = seq.len();
-    let mut l: HashSet<usize> = (1..=n + 2).into_iter().collect();
+    let l: HashSet<usize> = (1..=n + 2).into_iter().collect();
     let start = Instant::now();
     let v = l.iter().filter(|x| !seq.contains(x)).min();
     let duration = start.elapsed();
