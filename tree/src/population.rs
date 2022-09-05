@@ -74,5 +74,4 @@ fn gen_tree() {
     let map = generate_tree(&mut seq);
     println!("{:?}", map);
     assert!(map == tm);
-    assert!(false);
 }
