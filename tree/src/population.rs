@@ -1,12 +1,12 @@
 #![allow(dead_code, unused)]
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     hash::Hash,
     ops::Range,
 };
 
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
 
 pub struct Generation<T> {
     pub population: Vec<Individual<T>>,
@@ -15,12 +15,38 @@ pub struct Generation<T> {
 pub struct Individual<T> {
     pub chromosome: T,
     pub fitness: f64,
+    pub id: usize,
 }
 
+pub struct IntermediateNode<'a> {
+    pub value: &'a str,
+    pub arity: usize,
+}
 
-//pub fn generate_grammar_tree<'a>(tree: HashMap<&'a str, Vec<&'a str>>) -> HashMap<&'a str, Vec<&'a str>> {
-
-//}
+pub fn gen_rnd_expr<'a>(
+    intermediate: &'a Vec<IntermediateNode>,
+    leafs: &'a Vec<&str>,
+    depth: usize,
+    is_grow: bool,
+) -> Vec<&'a str> {
+    let mut expr: Vec<&str> = vec![];
+    let ind: usize = leafs.len() / (leafs.len() + intermediate.len());
+    let mut rng = rand::thread_rng();
+    if depth == 0 || rng.gen_range(0..=100) < ind {
+        if let Some(val) = leafs.choose(&mut rng) {
+            expr.push(val);
+        }
+    } else {
+        let inter = intermediate.choose(&mut rng).unwrap();
+        expr.push("(");
+        expr.push(inter.value);
+        for _ in (0..inter.arity) {
+            expr.append(&mut gen_rnd_expr(intermediate, leafs, depth - 1, is_grow))
+        }
+        expr.push(")");
+    }
+    expr
+}
 
 // Tree generation
 pub fn get_pruefer_seq(len: usize) -> Vec<usize> {
@@ -37,7 +63,7 @@ pub fn generate_tree(seq: &mut Vec<usize>) -> HashMap<usize, Vec<usize>> {
     let mut l: Vec<usize> = (1..=n + 2).into_iter().collect();
 
     let mut map: HashMap<usize, Vec<usize>> = HashMap::new();
-    for x in s.iter(){
+    for x in s.iter() {
         let s1: HashSet<usize> = l.iter().cloned().collect();
         let s2: HashSet<usize> = seq.iter().cloned().collect();
         let v = (&s1 - &s2);
@@ -60,7 +86,7 @@ use std::time::{Duration, Instant};
 #[test]
 fn gen_tree_by_long_pruefer() {
     let len = 100;
-    let mut  seq = get_pruefer_seq(len);
+    let mut seq = get_pruefer_seq(len);
     let map = generate_tree(&mut seq);
     println!("{:?}", map);
     assert!(map.len() <= len);
@@ -69,7 +95,7 @@ fn gen_tree_by_long_pruefer() {
 fn gen_tree() {
     let mut tm = HashMap::new();
     tm.insert(4, vec![1, 2, 3]);
-    tm.insert(5, vec![ 4, 6]);
+    tm.insert(5, vec![4, 6]);
     let mut seq = vec![4, 4, 4, 5];
     let map = generate_tree(&mut seq);
     println!("{:?}", map);
