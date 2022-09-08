@@ -20,8 +20,11 @@ pub struct Individual<T> {
 
 pub struct IntermediateNode<'a> {
     pub value: &'a str,
+    pub random_arity: bool,
     pub arity: usize,
 }
+
+
 
 pub fn gen_rnd_expr<'a>(
     intermediate: &'a Vec<IntermediateNode>,
@@ -32,7 +35,7 @@ pub fn gen_rnd_expr<'a>(
     let mut expr: Vec<&str> = vec![];
     let ind: usize = leafs.len() / (leafs.len() + intermediate.len());
     let mut rng = rand::thread_rng();
-    if depth == 0 || rng.gen_range(0..=100) < ind {
+    if depth == 0 || is_grow && rng.gen_range(0..=100) < ind {
         if let Some(val) = leafs.choose(&mut rng) {
             expr.push(val);
         }
@@ -40,7 +43,11 @@ pub fn gen_rnd_expr<'a>(
         let inter = intermediate.choose(&mut rng).unwrap();
         expr.push("(");
         expr.push(inter.value);
-        for _ in (0..inter.arity) {
+        let mut arity = 1;
+        if inter.random_arity {
+            arity = rng.gen_range(1..10);
+        }
+        for _ in (0..arity) {
             expr.append(&mut gen_rnd_expr(intermediate, leafs, depth - 1, is_grow))
         }
         expr.push(")");
@@ -83,6 +90,44 @@ pub fn generate_tree(seq: &mut Vec<usize>) -> HashMap<usize, Vec<usize>> {
 }
 
 use std::time::{Duration, Instant};
+
+pub fn get_leafs<'a>() -> Vec<&'a str>{
+    vec!["pickup","place","move", "ready"]
+}
+
+pub fn get_intermediate<'a>() -> Vec<IntermediateNode<'a>>{
+
+    vec![IntermediateNode{value:"seq", arity: 2, random_arity: true},
+        IntermediateNode{value:"fall", arity:2 , random_arity: true},
+        IntermediateNode{value:"par" , arity:2 , random_arity: true},
+        IntermediateNode{value:"pol" , arity:1 , random_arity: false}]
+}
+
+
+#[test]
+fn gen_full(){
+    let depth = 3;
+    let inter = get_intermediate();
+    let leafs = get_leafs();
+     let start = Instant::now();
+    let expr = gen_rnd_expr(&inter, &leafs, depth, false);
+    println!("{:?}", expr);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+}
+
+#[test]
+fn get_grow(){
+    let depth = 3;
+    let inter = get_intermediate();
+    let leafs = get_leafs();
+     let start = Instant::now();
+    let expr = gen_rnd_expr(&inter, &leafs, depth, true);
+    println!("{:?}", expr);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+}
+
 #[test]
 fn gen_tree_by_long_pruefer() {
     let len = 100;
