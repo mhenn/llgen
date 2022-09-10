@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::time::Instant;
+use tree::init::*;
 use tree::population::*;
 
 fn vect_difference(v1: &Vec<usize>, v2: &Vec<usize>) -> Vec<usize> {
