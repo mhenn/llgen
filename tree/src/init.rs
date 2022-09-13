@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::{collections::{HashMap, HashSet, VecDeque}, fmt::Debug};
 use rand::{rngs::ThreadRng, seq::SliceRandom, Rng};
 
 pub struct Nodes<T> {
@@ -80,47 +80,65 @@ pub fn ramped_half_half<'a>(
     chroms
 }
 
+
+pub fn bfs_rec<T>(q: &mut VecDeque<&Node<T>>) where T: Debug+ Clone + Default{
+    let v = q.pop_back().unwrap();
+    println!("{:?}", v.value);
+    for x in v.children.iter(){
+        q.push_front(x);
+    }
+    bfs_rec(q);
+}
+
+
+
+#[derive(Default,Debug,Clone )]
 pub struct Node<T>{
-    value: Vec<T>,
+    value: T,
     children: Vec<Node<T>>
+}
+
+impl<T> Node<T> where T: Debug+ Default +Clone{
+    pub fn new() -> Self {
+        Node{value: T::default(), children: vec![] }
+    }
+
+    pub fn bfs(&self){
+        let mut q : VecDeque<&Node<T>> = VecDeque::new();
+        q.push_front(self);
+        bfs_rec(&mut q);
+    }
 
 }
 
-pub fn gen_rnd_expr_tree<T>(
-    nodes: &Nodes<T>,
-    delimeter: &(T, T),
-    config: &Settings,
+pub fn gen_rnd_expr_tree<'a>(
+    nodes: &Nodes<&'a str>,
     depth: usize,
+    width: u8,
     is_grow: bool,
-) -> Vec<T>
-where
-    T: Copy,
+) -> Option<Node<&'a str>>
 {
-    let mut expr: Vec<T> = vec![];
+    let mut expr: Node<&str> = Node::new();
     let ind: usize = nodes.leafs.len() / (nodes.leafs.len() + nodes.intermediate.len());
     let mut rng = rand::thread_rng();
     if depth == 0 || is_grow && rng.gen_range(0..=100) < ind {
         if let Some(val) = nodes.leafs.choose(&mut rng) {
-            expr.push(*val);
+            expr.value = *val;
         }
     } else {
-        if rng.gen_range(0.0..=100.0) <= config.population.empty_branch_rate * 100.0 {
-            return vec![];
-        }
-
         let inter = nodes.intermediate.choose(&mut rng).unwrap();
-        expr.push(delimeter.0);
-        expr.push(inter.value);
+        expr.value = inter.value;
         let mut arity = 1;
         if inter.random_arity {
-            arity = rng.gen_range(1..2);
+            arity = rng.gen_range(1..=width);
         }
         for _ in 0..arity {
-            expr.append(&mut gen_rnd_expr(nodes, delimeter, config, depth, is_grow))
+           if let Some(node) = gen_rnd_expr_tree(nodes, depth -1, width,  is_grow) {
+                expr.children.push(node);
+           }
         }
-        expr.push(delimeter.1);
     }
-    expr
+    Some(expr)
 }
 
 
@@ -207,7 +225,7 @@ where
             arity = rng.gen_range(1..2);
         }
         for _ in 0..arity {
-            expr.append(&mut gen_rnd_expr(nodes, delimeter, config, depth, is_grow))
+            expr.append(&mut gen_rnd_expr(nodes, delimeter, config, depth -1, is_grow))
         }
         expr.push(delimeter.1);
     }
@@ -299,6 +317,21 @@ use crate::{
 //    println!("Time elapsed in expensive_function() is: {:?}", duration);
 //    assert!(false)
 //}
+
+#[test]
+fn gen_full_tree() {
+    let nodes = get_nodes();
+    let start = Instant::now();
+    let depth = 3;
+    let width =3 ;
+    let expr = gen_rnd_expr_tree(&nodes, depth ,width, false).unwrap();
+    expr.bfs();
+//    println!("{:?}", expr);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+    assert!(false);
+}
+
 #[test]
 fn gen_full_iter() {
     let nodes = get_nodes();
@@ -356,7 +389,7 @@ fn chrom_generate_ind(){
     println!("{:?}", value);
     println!("{:?}", ret);
     println!("Time elapsed in expensive_function() is: {:?}", duration);
-    assert!(false);
+  //  assert!(false);
 }
 
 
