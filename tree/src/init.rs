@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet, VecDeque};
-
 use rand::{rngs::ThreadRng, seq::SliceRandom, Rng};
 
 pub struct Nodes<T> {
@@ -67,8 +66,8 @@ pub fn ramped_half_half<'a>(
     size: usize,
     nodes: &Nodes<&'a str>,
     config: &Settings,
-) -> Vec<Individual<Vec<&'a str>>> {
-    let mut chroms: Vec<Individual<Vec<&str>>> = vec![];
+) -> Vec<Individual<&'a str>> {
+    let mut chroms: Vec<Individual<&str>> = vec![];
     for x in 0..size {
         let typ = x < size / 2;
         let tree = gen_rnd_expr_iter::<&str>(nodes, &get_delim(), config, typ);
@@ -80,6 +79,51 @@ pub fn ramped_half_half<'a>(
     }
     chroms
 }
+
+pub struct Node<T>{
+    value: Vec<T>,
+    children: Vec<Node<T>>
+
+}
+
+pub fn gen_rnd_expr_tree<T>(
+    nodes: &Nodes<T>,
+    delimeter: &(T, T),
+    config: &Settings,
+    depth: usize,
+    is_grow: bool,
+) -> Vec<T>
+where
+    T: Copy,
+{
+    let mut expr: Vec<T> = vec![];
+    let ind: usize = nodes.leafs.len() / (nodes.leafs.len() + nodes.intermediate.len());
+    let mut rng = rand::thread_rng();
+    if depth == 0 || is_grow && rng.gen_range(0..=100) < ind {
+        if let Some(val) = nodes.leafs.choose(&mut rng) {
+            expr.push(*val);
+        }
+    } else {
+        if rng.gen_range(0.0..=100.0) <= config.population.empty_branch_rate * 100.0 {
+            return vec![];
+        }
+
+        let inter = nodes.intermediate.choose(&mut rng).unwrap();
+        expr.push(delimeter.0);
+        expr.push(inter.value);
+        let mut arity = 1;
+        if inter.random_arity {
+            arity = rng.gen_range(1..2);
+        }
+        for _ in 0..arity {
+            expr.append(&mut gen_rnd_expr(nodes, delimeter, config, depth, is_grow))
+        }
+        expr.push(delimeter.1);
+    }
+    expr
+}
+
+
 
 pub fn gen_rnd_expr_iter<T>(
     nodes: &Nodes<T>,
@@ -108,10 +152,10 @@ where
                 stack.push_front(NodeType::Symbol(delimeter.1));
                 let mut arity = 1;
                 if node.random_arity {
-                    arity = rng.gen_range(1..width);
+                    arity = rng.gen_range(1..=width);
                 }
                 for _ in 0..arity {
-                    if depth >= max_depth || is_grow && rng.gen_range(0..=100) < ind {
+                    if depth > max_depth || is_grow && rng.gen_range(0..=100) < ind {
                         stack.push_front(NodeType::Leaf(*nodes.leafs.choose(&mut rng).unwrap()));
                     } else {
                     if rng.gen_range(0.0..=100.0) <= config.population.empty_branch_rate * 100.0 {
@@ -237,7 +281,7 @@ pub fn generate_tree(seq: &mut Vec<usize>) -> (HashMap<usize, Vec<usize>>, usize
 use std::time::{Duration, Instant};
 
 use crate::{
-    population::Individual,
+    population::{Individual, to_xml},
     settings::{self, Population, Settings},
 };
 
@@ -279,6 +323,10 @@ fn get_grow_iter() {
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
 
+pub fn get_xml_delims<'a>() -> (&'a str,&'a str,&'a str){
+    ("<","/",">")
+}
+
 #[test]
 fn chrom_generate(){
     let size = 100;
@@ -294,6 +342,25 @@ fn chrom_generate(){
 }
 
 #[test]
+fn chrom_generate_ind(){
+    let size = 1;
+    let mut settings = Settings::new().unwrap();
+    settings.population.tree_depth = 2;
+    settings.population.tree_width = 2;
+    let nodes = get_nodes();
+    let inds = ramped_half_half(size, &nodes, &settings);
+    let value = inds[0].chromosome.clone();
+    let start = Instant::now();
+    let ret = to_xml(value.clone(), &get_xml_delims());
+    let duration = start.elapsed();
+    println!("{:?}", value);
+    println!("{:?}", ret);
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+    assert!(false);
+}
+
+
+#[test]
 fn gen_tree_by_long_pruefer() {
     let len = 100;
     let mut seq = get_pruefer_seq(len);
@@ -301,6 +368,7 @@ fn gen_tree_by_long_pruefer() {
     println!("{:?}", map);
     assert!(map.len() <= len);
 }
+
 #[test]
 fn gen_tree() {
     let mut tm = HashMap::new();

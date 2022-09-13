@@ -1,7 +1,10 @@
 use crate::{init::*, settings::*};
 
+
+
+
 #[test]
-fn get_grow_iter() {
+fn get_grow() {
     let nodes = get_nodes();
     let mut settings = Settings::new().unwrap();
     settings.population.tree_depth = 3;
