@@ -1,5 +1,5 @@
 use std::{
-    collections::{ VecDeque},
+    collections::VecDeque,
     fmt::Debug,
     sync::atomic::{AtomicUsize, Ordering},
 };
@@ -37,8 +37,6 @@ where
         bfs_rec(&mut q);
     }
 }
-
-
 
 
 #[derive(Copy, Clone)]

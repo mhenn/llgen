@@ -1,0 +1,25 @@
+
+running 2 tests
+test init::gen_full_tree_dfs ... FAILED
+test xml::get_grow ... ok
+
+failures:
+
+---- init::gen_full_tree_dfs stdout ----
+
+<pol>
+    <seq>
+        <seq><move/><pickup/><pickup/></seq>
+        <fall><pickup/></fall>
+    </seq>
+</pol>
+Time elapsed in expensive_function() is: 138.952µs
+thread 'init::gen_full_tree_dfs' panicked at 'assertion failed: false', tree/src/init.rs:196:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+init::gen_full_tree_dfs
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

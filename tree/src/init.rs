@@ -3,22 +3,53 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, Rng};
 
 
 
-pub fn to_list<T>(node: Node<T>)
+pub fn to_list<T>(node: &Node<T>, delimeter: &(T, T)) -> Vec<T>
     where T: Default + Debug + Copy
 {
+    let mut expr: Vec<T> = vec![];
+    if !node.children.is_empty(){
+        expr.push(delimeter.0);
+    }
+    expr.push(node.value);
+    for sub_t in node.children.iter(){
+       expr.append(&mut to_list(sub_t, delimeter));
+    }
 
     if !node.children.is_empty(){
-        println!("({:?}",  node.value);
+        expr.push(delimeter.1);
     }
-    for x in node.children.iter(){
-        to_list(x.clone());
-
-    if !node.children.is_empty(){
-        println!(")")
-    }
-   }
-
+    expr
 }
+
+pub fn to_xmly<T>(node: &Node<T>, delimeter: &(T,T,T)) -> Vec<T>
+    where T: Default + Debug + Copy
+{
+    let mut expr: Vec<T> = vec![];
+    expr.push(delimeter.0);
+    expr.push(node.value);
+
+    if node.children.is_empty(){
+        expr.push(delimeter.1);
+    }
+    expr.push(delimeter.2);
+
+    for sub_t in node.children.iter(){
+       expr.append(&mut to_xmly(sub_t, delimeter));
+
+    }
+
+    if node.children.is_empty(){
+        return expr
+    }
+    expr.push(delimeter.0);
+    expr.push(delimeter.1);
+    expr.push(node.value);
+    expr.push(delimeter.2);
+
+
+    expr
+}
+
 
 
 pub fn ramped_half_half<'a>(
@@ -53,7 +84,6 @@ pub fn gen_rnd_expr_tree<'a>(
     let mut rng = rand::thread_rng();
     if depth == 0 || is_grow && rng.gen_range(0..=100) < ind {
         if let Some(val) = nodes.leafs.choose(&mut rng) {
-            println!("{:?}", val);
             expr.value = *val;
         }
     } else {
@@ -65,7 +95,6 @@ pub fn gen_rnd_expr_tree<'a>(
         }
         for _ in 0..arity {
             if let Some(node) = gen_rnd_expr_tree(nodes, depth - 1, width, is_grow) {
-                println!("{:?}", node.value);
                 expr.children.push(node);
             }
         }
@@ -115,43 +144,41 @@ where
     }
     expr
 }
-use std::{time::{Duration, Instant}, fmt::Debug};
+use std::{time::{Duration, Instant}, fmt::Debug, fs};
 
 use crate::{
     population::{to_xml, Individual},
     settings::{self, Population, Settings},
 };
-
-#[test]
-fn gen_full_tree_list() {
-    let nodes = get_nodes();
-    let start = Instant::now();
-    let depth = 3;
-    let width = 3;
-    let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
-    to_list(expr);
-    //    println!("{:?}", expr);
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
-    assert!(false);
-}
-
-
-
-#[test]
-fn gen_full_tree() {
-    let nodes = get_nodes();
-    let start = Instant::now();
-    let depth = 3;
-    let width = 3;
-    let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
-    expr.bfs();
-    //    println!("{:?}", expr);
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
-    assert!(false);
-}
-
+//
+//#[test]
+//fn gen_full_tree_list() {
+//    let nodes = get_nodes();
+//    let start = Instant::now();
+//    let depth = 3;
+//    let width = 3;
+//    let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
+//    to_list(expr);
+//    //    println!("{:?}", expr);
+//    let duration = start.elapsed();
+//    println!("Time elapsed in expensive_function() is: {:?}", duration);
+//}
+//
+//
+//
+//#[test]
+//fn gen_full_tree() {
+//    let nodes = get_nodes();
+//    let start = Instant::now();
+//    let depth = 3;
+//    let width = 3;
+//    let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
+//    expr.bfs();
+//    //    println!("{:?}", expr);
+//    let duration = start.elapsed();
+//    println!("Time elapsed in expensive_function() is: {:?}", duration);
+//}
+//
 #[test]
 fn gen_full_tree_dfs() {
     let nodes = get_nodes();
@@ -159,8 +186,11 @@ fn gen_full_tree_dfs() {
     let depth = 3;
     let width = 3;
     let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
-    dfs_rec(expr);
-    //    println!("{:?}", expr);
+    //print!("{:?}", expr);
+    println!();
+    let mut xmly = to_xmly(&expr, &get_xml_delims());
+    let xmly: String = xmly.into_iter().collect();
+    println!("{:?}", xmly);
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
     assert!(false);
@@ -169,16 +199,16 @@ pub fn get_xml_delims<'a>() -> (&'a str, &'a str, &'a str) {
     ("<", "/", ">")
 }
 
-#[test]
-fn chrom_generate() {
-    let size = 100;
-    let mut settings = Settings::new().unwrap();
-    settings.population.tree_depth = 3;
-    settings.population.tree_width = 3;
-    let nodes = get_nodes();
-    let start = Instant::now();
-    let inds = ramped_half_half(size, &nodes, &settings);
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
-    print!("{:?}", inds[0].chromosome);
-}
+//#[test]
+//fn chrom_generate() {
+//    let size = 100;
+//    let mut settings = Settings::new().unwrap();
+//    settings.population.tree_depth = 3;
+//    settings.population.tree_width = 3;
+//    let nodes = get_nodes();
+//    let start = Instant::now();
+//    let inds = ramped_half_half(size, &nodes, &settings);
+//    let duration = start.elapsed();
+//    println!("Time elapsed in expensive_function() is: {:?}", duration);
+//    print!("{:?}", inds[0].chromosome);
+//}
