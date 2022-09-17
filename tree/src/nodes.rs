@@ -1,14 +1,6 @@
-use std::{
-    collections::VecDeque,
-    fmt::Debug,
-    sync::atomic::{AtomicUsize, Ordering},
-};
-
-
-static COUNTER: AtomicUsize = AtomicUsize::new(1);
+use std::{collections::VecDeque, fmt::Debug};
 
 pub struct Nodes<T> {
-    pub root: T,
     pub intermediate: Vec<IntermediateNode<T>>,
     pub leafs: Vec<T>,
 }
@@ -24,9 +16,9 @@ impl<T> Node<T>
 where
     T: Debug + Default + Clone,
 {
-    pub fn new() -> Self {
+    pub fn new(id: usize) -> Self {
         Node {
-            id: COUNTER.fetch_add(1, Ordering::Relaxed),
+            id,
             value: T::default(),
             children: vec![],
         }
@@ -37,7 +29,6 @@ where
         bfs_rec(&mut q);
     }
 }
-
 
 #[derive(Copy, Clone)]
 pub struct IntermediateNode<T> {
@@ -51,7 +42,6 @@ pub enum NodeType<T> {
     Intermediate((IntermediateNode<T>, usize)),
     Leaf(T),
 }
-
 
 pub fn bfs_rec<T>(q: &mut VecDeque<&Node<T>>)
 where
@@ -74,5 +64,3 @@ where
         dfs_rec(u.clone());
     }
 }
-
-

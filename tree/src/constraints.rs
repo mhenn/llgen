@@ -1,17 +1,13 @@
 use crate::nodes::*;
 
-
 pub fn get_nodes<'a>() -> Nodes<&'a str> {
     let intermediate = intermediates();
     let leafs = leafs();
-    Nodes {
-        root: "root",
+    Nodes::<&str> {
         intermediate,
         leafs,
     }
 }
-
-
 
 pub fn intermediates<'a>() -> Vec<IntermediateNode<&'a str>> {
     vec![
