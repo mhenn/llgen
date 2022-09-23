@@ -1,5 +1,7 @@
 #![allow(dead_code, unused)]
 
+use rand::{seq::SliceRandom, rngs::ThreadRng, thread_rng};
+
 use crate::{constraints::get_nodes, nodes::Nodes, settings::Settings};
 
 pub struct Generation<T> {
@@ -7,7 +9,13 @@ pub struct Generation<T> {
     pub individuals: Vec<Individual<T>>,
 }
 
-pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) {}
+pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) -> Parents<T>
+    where T: Copy
+{
+    let i1 = individuals.choose_weighted(&mut thread_rng(), |item| item.fitness_percentage).unwrap();
+    let i2 = individuals.choose_weighted(&mut thread_rng(), |item| item.fitness_percentage).unwrap();
+    Parents { first: *i1, second: *i2 }
+}
 
 impl<T> Generation<T>
 where
@@ -40,9 +48,23 @@ where
             .sort_by(|a, b| b.fitness.total_cmp(&a.fitness));
     }
 
-    pub fn crossover(&mut self, combine: fn(Individual<T>, Individual<T>) -> Vec<Individual<T>>) {
-        self.individuals = combine();
+    pub fn crossover(
+        &mut self,
+        amount: usize,
+        combine: fn(Individual<T>, Individual<T>) -> Vec<Individual<T>>,
+        selection: fn(&Vec<Individual<T>>) -> Parents<T>,
+    ) {
+        for _ in 0..amount {
+            let parents = selection(&self.individuals);
+            self.individuals = combine(parents.first, parents.second);
+        }
     }
+}
+
+
+pub struct Parents<T>{
+    pub first: Individual<T>,
+    pub second: Individual<T>,
 }
 
 #[derive(Clone, Copy)]

@@ -65,6 +65,7 @@ where
             chroms.push(Individual {
                 chromosome: tree,
                 fitness: 0.0,
+                fitness_percentage: 0.0,
                 id: x,
             });
         }
