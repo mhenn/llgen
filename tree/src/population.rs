@@ -9,6 +9,26 @@ pub struct Generation<T> {
     pub individuals: Vec<Individual<T>>,
 }
 
+//pub fn node_crossover<T>(first: Individual<T>,second: Individual<T>)-> Individual<T>{
+//
+//}
+//
+//pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
+//
+//}
+
+
+pub fn tree_crossover<T>(first: Individual<T>,second: Individual<T>,offspring: usize ) -> Vec<Individual<T>>
+{
+    let mut ret: Vec<Individual<T>> = vec![];
+    for _ in 0.. offspring{
+//        ret.push(node_crossover(first, second));
+    }
+   // ret.push(subtree_crossover(first, second));
+    ret
+}
+
+
 pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) -> Parents<T>
     where T: Copy
 {
@@ -50,13 +70,14 @@ where
 
     pub fn crossover(
         &mut self,
-        amount: usize,
-        combine: fn(Individual<T>, Individual<T>) -> Vec<Individual<T>>,
+        offspring: usize,
+        combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
         selection: fn(&Vec<Individual<T>>) -> Parents<T>,
     ) {
-        for _ in 0..amount {
+        let end = self.size / offspring;
+        for _ in 0..end {
             let parents = selection(&self.individuals);
-            self.individuals = combine(parents.first, parents.second);
+            self.individuals = combine(parents.first, parents.second, offspring);
         }
     }
 }

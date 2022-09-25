@@ -155,20 +155,35 @@ use std::{
     time::{Duration, Instant},
 };
 
-//#[test]
-//fn gen_full_tree_dfs() {
-//    let nodes = get_nodes();
-//    let start = Instant::now();
-//    let depth = 3;
-//    let width = 3;
-//    let expr = gen_rnd_expr_tree(&nodes, depth, width, false).unwrap();
-//    //print!("{:?}", expr);
-////    let mut xml = to_xml(&expr, &get_xml_delims());
-////    let xml: String = xml.into_iter().collect();
-////    println!("{:?}", xml);
-//    let duration = start.elapsed();
-//    println!("Time elapsed in expensive_function() is: {:?}", duration);
-//}
+pub fn get_test_tree<'a>() -> Node<&'a str>{
+    let nodes = get_nodes();
+    let depth = 3;
+    let width = 3;
+    gen_rnd_expr_tree(&nodes, depth, width, false, 0).unwrap()
+}
+
+
+#[test]
+fn gen_tree_to_xml() {
+    let start = Instant::now();
+    let expr = get_test_tree();
+    print!("{:?}", expr);
+    let mut xml = to_xml(&expr, &get_xml_delims());
+    let xml: String = xml.into_iter().collect();
+    println!("{:?}", xml);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+}
+
+
+#[test]
+fn gen_full_tree() {
+    let start = Instant::now();
+    let expr = get_test_tree();
+    print!("{:?}", expr);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+}
 pub fn get_xml_delims<'a>() -> (&'a str, &'a str, &'a str) {
     ("<", "/", ">")
 }

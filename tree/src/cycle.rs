@@ -3,8 +3,6 @@ use std::collections::HashMap;
 
 
 
-
-
 pub fn evolution_cycle<'a>(
     init: fn(usize, &Nodes<T>, &Settings) -> Vec<Individual<T>>,
     pop_size: usize,
