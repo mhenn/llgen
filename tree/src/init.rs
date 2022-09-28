@@ -163,6 +163,15 @@ pub fn get_test_tree<'a>() -> Node<&'a str> {
 }
 
 #[test]
+fn ramped_hh() {
+    let nodes = get_nodes();
+    let size = 100;
+    let config = Settings::new().unwrap();
+    let ret = ramped_half_half(size, &nodes, &config);
+    assert!(ret.len() == 100);
+}
+
+#[test]
 fn gen_tree_to_xml() {
     let start = Instant::now();
     let expr = get_test_tree();

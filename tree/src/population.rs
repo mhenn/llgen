@@ -4,11 +4,12 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 
 use crate::{constraints::get_nodes, nodes::Nodes, settings::Settings};
 
+
+#[derive(Default)]
 pub struct Generation<T> {
     pub size: usize,
     pub individuals: Vec<Individual<T>>,
 }
-
 //pub fn node_crossover<T>(first: Individual<T>,second: Individual<T>)-> Individual<T>{
 //
 //}
@@ -48,17 +49,19 @@ where
 
 impl<T> Generation<T>
 where
-    T: Copy + Clone,
+    T: Copy + Clone + Default,
 {
+    pub fn new(size:usize) -> Generation<T>{
+        Generation{size, ..Default::default()}
+    }
+
     pub fn populate(
         &mut self,
         nodes: &Nodes<T>,
+        settings : &Settings,
         func: fn(usize, &Nodes<T>, &Settings) -> Vec<Individual<T>>,
-        size: usize,
     ) {
-        let mut settings = Settings::new().unwrap();
-        let gen = func(size, nodes, &settings);
-        self.size = size;
+        let gen = func(self.size, nodes, &settings);
         self.individuals = gen;
     }
 

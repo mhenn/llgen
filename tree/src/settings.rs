@@ -24,3 +24,9 @@ impl Settings {
         s.try_deserialize()
     }
 }
+
+#[test]
+fn config_note_empty() {
+    let conf = Settings::new();
+    assert!(conf.is_ok());
+}
