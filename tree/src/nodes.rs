@@ -1,5 +1,21 @@
 use std::{collections::VecDeque, fmt::Debug};
 
+pub struct Counter {
+    id: usize,
+}
+
+impl Counter {
+    pub fn new() -> Counter {
+        Counter { id: 0 }
+    }
+
+    pub fn increment_id(&mut self) -> usize {
+        let ret = self.id;
+        self.id += 1;
+        ret
+    }
+}
+
 pub struct Nodes<T> {
     pub intermediate: Vec<IntermediateNode<T>>,
     pub leafs: Vec<T>,
@@ -42,6 +58,22 @@ pub enum NodeType<T> {
     Intermediate((IntermediateNode<T>, usize)),
     Leaf(T),
 }
+
+pub fn get_node_count<T>(node: &Node<T>) -> usize {
+    let mut ret = 1;
+    if node.children.is_empty() {
+        return ret;
+    }
+    for x in node.children.iter() {
+        ret += get_node_count(x);
+    }
+    ret
+}
+
+pub get_node_bfs(node: &Node<T>) -> Node<T>{
+
+}
+
 
 pub fn bfs_rec<T>(q: &mut VecDeque<&Node<T>>)
 where

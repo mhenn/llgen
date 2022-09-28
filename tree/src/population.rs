@@ -1,18 +1,32 @@
 #![allow(dead_code, unused)]
 
-use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
+use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
-use crate::{constraints::get_nodes, nodes::Nodes, settings::Settings};
-
+use crate::{
+    constraints::get_nodes,
+    nodes::{get_node_count, Node, Nodes},
+    settings::Settings,
+};
 
 #[derive(Default)]
 pub struct Generation<T> {
     pub size: usize,
     pub individuals: Vec<Individual<T>>,
 }
-//pub fn node_crossover<T>(first: Individual<T>,second: Individual<T>)-> Individual<T>{
-//
-//}
+pub fn node_crossover<T>(
+    first: Individual<Node<T>>,
+    second: Individual<Node<T>>,
+) -> IndividualTuple<T> {
+    let node_count_first = get_node_count(&first.chromosome);
+    let node_count_second = get_node_count(&second.chromosome);
+    let end = if node_count_first > node_count_second {
+        node_count_first
+    } else {
+        node_count_second
+    };
+    let nr = thread_rng().gen_range(0..end);
+
+}
 //
 //pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
 //
@@ -51,14 +65,17 @@ impl<T> Generation<T>
 where
     T: Copy + Clone + Default,
 {
-    pub fn new(size:usize) -> Generation<T>{
-        Generation{size, ..Default::default()}
+    pub fn new(size: usize) -> Generation<T> {
+        Generation {
+            size,
+            ..Default::default()
+        }
     }
 
     pub fn populate(
         &mut self,
         nodes: &Nodes<T>,
-        settings : &Settings,
+        settings: &Settings,
         func: fn(usize, &Nodes<T>, &Settings) -> Vec<Individual<T>>,
     ) {
         let gen = func(self.size, nodes, &settings);
@@ -84,7 +101,7 @@ where
         &mut self,
         offspring: usize,
         combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
-        selection: fn(&Vec<Individual<T>>) -> Parents<T>,
+        selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
     ) {
         let end = self.size / offspring;
         for _ in 0..end {
@@ -94,7 +111,7 @@ where
     }
 }
 
-pub struct Parents<T> {
+pub struct IndividualTuple<T> {
     pub first: Individual<T>,
     pub second: Individual<T>,
 }

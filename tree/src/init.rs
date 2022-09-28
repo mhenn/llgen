@@ -61,7 +61,7 @@ where
         let typ = x < size / 2;
         let depth = config.population.tree_depth;
         let width = config.population.tree_width;
-        if let Some(tree) = gen_rnd_expr_tree(nodes, depth, width as u8, typ, 1) {
+        if let Some(tree) = gen_rnd_expr_tree(nodes, depth, width as u8, typ, &mut Counter::new()) {
             chroms.push(Individual {
                 chromosome: tree,
                 fitness: 0.0,
@@ -78,11 +78,12 @@ pub fn gen_rnd_expr_tree<T>(
     depth: usize,
     width: u8,
     is_grow: bool,
-    id: usize,
+    counter: &mut Counter,
 ) -> Option<Node<T>>
 where
     T: Debug + Copy + Default,
 {
+    let id = counter.increment_id();
     let mut expr: Node<T> = Node::new(id);
     let ind: usize = nodes.leafs.len() / (nodes.leafs.len() + nodes.intermediate.len());
     let mut rng = rand::thread_rng();
@@ -98,7 +99,7 @@ where
             arity = rng.gen_range(1..=width);
         }
         for _ in 0..arity {
-            if let Some(node) = gen_rnd_expr_tree(nodes, depth - 1, width, is_grow, id + 1) {
+            if let Some(node) = gen_rnd_expr_tree(nodes, depth - 1, width, is_grow, counter) {
                 expr.children.push(node);
             }
         }
@@ -150,6 +151,7 @@ where
 }
 
 use std::{
+    collections::VecDeque,
     fmt::Debug,
     fs,
     time::{Duration, Instant},
@@ -159,7 +161,7 @@ pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();
     let depth = 3;
     let width = 3;
-    gen_rnd_expr_tree(&nodes, depth, width, false, 0).unwrap()
+    gen_rnd_expr_tree(&nodes, depth, width, false, &mut Counter::new()).unwrap()
 }
 
 #[test]
@@ -169,6 +171,18 @@ fn ramped_hh() {
     let config = Settings::new().unwrap();
     let ret = ramped_half_half(size, &nodes, &config);
     assert!(ret.len() == 100);
+}
+
+#[test]
+fn gen_tree_node_count() {
+    let start = Instant::now();
+    let expr = get_test_tree();
+    print!("{:?}", expr);
+    let nodes = get_node_count(&expr);
+    print!("{:?}", nodes);
+    let duration = start.elapsed();
+
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
 
 #[test]
