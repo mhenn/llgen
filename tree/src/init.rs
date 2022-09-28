@@ -155,13 +155,12 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub fn get_test_tree<'a>() -> Node<&'a str>{
+pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();
     let depth = 3;
     let width = 3;
     gen_rnd_expr_tree(&nodes, depth, width, false, 0).unwrap()
 }
-
 
 #[test]
 fn gen_tree_to_xml() {
@@ -174,7 +173,6 @@ fn gen_tree_to_xml() {
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
-
 
 #[test]
 fn gen_full_tree() {
