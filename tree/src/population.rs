@@ -4,7 +4,7 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use crate::{
     constraints::get_nodes,
-    nodes::{get_node_count, Node, Nodes},
+    nodes::{get_node_by_id, get_node_count, Node, Nodes},
     settings::Settings,
 };
 
@@ -25,7 +25,10 @@ pub fn node_crossover<T>(
         node_count_second
     };
     let nr = thread_rng().gen_range(0..end);
+    let node = get_node_by_id(&first.chromosome, nr);
 
+    //1. set node for each individual
+    //2. return tuple
 }
 //
 //pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{

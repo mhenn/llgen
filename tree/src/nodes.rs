@@ -30,7 +30,7 @@ pub struct Node<T> {
 
 impl<T> Node<T>
 where
-    T: Debug + Default + Clone,
+    T: Debug + Default + Clone + PartialEq,
 {
     pub fn new(id: usize) -> Self {
         Node {
@@ -39,10 +39,30 @@ where
             children: vec![],
         }
     }
+
     pub fn bfs(&self) {
         let mut q: VecDeque<&Node<T>> = VecDeque::new();
         q.push_front(self);
         bfs_rec(&mut q);
+    }
+
+    pub fn set_node(&mut self, node: &Node<T>, constraints: Nodes<T>) {
+        // should be more generic but ... meh
+        if self.children.is_empty() && node.children.is_empty() {
+            self.value = node.value;
+        } else if !self.children.is_empty() && !node.children.is_empty() {
+            if constraints
+                .intermediate
+                .iter()
+                .any(|x| x.value == self.value && x.arity == 1)
+                && self.children.len() > 1
+            {
+                return;
+            }
+        } else {
+            return
+        }
+        self.value = node.value;
     }
 }
 
@@ -70,10 +90,24 @@ pub fn get_node_count<T>(node: &Node<T>) -> usize {
     ret
 }
 
-pub get_node_bfs(node: &Node<T>) -> Node<T>{
+pub fn get_node_by_id<T>(root: &Node<T>, search_id: usize) -> Option<Node<T>> {
+    if root.id == search_id {
+        return Some(*root);
+    }
 
+    let mut que: VecDeque<&Node<T>> = VecDeque::new();
+    que.push_front(root);
+
+    while let Some(node) = que.pop_back() {
+        for child in node.children {
+            if child.id == search_id {
+                return Some(child);
+            }
+            que.push_front(&child);
+        }
+    }
+    None
 }
-
 
 pub fn bfs_rec<T>(q: &mut VecDeque<&Node<T>>)
 where
