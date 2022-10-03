@@ -4,6 +4,19 @@ pub struct Counter {
     id: usize,
 }
 
+#[derive(Copy, Clone)]
+pub struct IntermediateNode<T> {
+    pub value: T,
+    pub random_arity: bool,
+    pub arity: usize,
+}
+
+pub enum NodeType<T> {
+    Symbol(T),
+    Intermediate((IntermediateNode<T>, usize)),
+    Leaf(T),
+}
+
 impl Counter {
     pub fn new() -> Counter {
         Counter { id: 0 }
@@ -46,7 +59,7 @@ where
         bfs_rec(&mut q);
     }
 
-    pub fn set_node(&mut self, node: &Node<T>, constraints: Nodes<T>) {
+    pub fn set_node(&mut self, node: &Node<T>, constraints: &Nodes<T>) {
         // should be more generic but ... meh
         if self.children.is_empty() && node.children.is_empty() {
             self.value = node.value;
@@ -66,18 +79,16 @@ where
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct IntermediateNode<T> {
-    pub value: T,
-    pub random_arity: bool,
-    pub arity: usize,
+
+pub fn set_single_node_by_id<T>(root: &Node<T>, node: &Node<T>, id: usize, constraints: &Nodes<T>)
+where T: Debug+Default+PartialEq+Clone
+{
+    let result_node = get_node_by_id(root, id);
+    if let Some(val) = get_node_by_id(root, id) {
+        val.set_node(node, constraints);
+    }
 }
 
-pub enum NodeType<T> {
-    Symbol(T),
-    Intermediate((IntermediateNode<T>, usize)),
-    Leaf(T),
-}
 
 pub fn get_node_count<T>(node: &Node<T>) -> usize {
     let mut ret = 1;

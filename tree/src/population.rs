@@ -48,7 +48,7 @@ pub fn tree_crossover<T>(
     ret
 }
 
-pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) -> Parents<T>
+pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) -> IndividualTuple<T>
 where
     T: Copy,
 {
