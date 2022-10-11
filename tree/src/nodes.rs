@@ -43,7 +43,7 @@ pub struct Node<T> {
 
 impl<T> Node<T>
 where
-    T: Debug + Default + Clone + PartialEq,
+    T: Debug+  Default + Clone +  PartialEq,
 {
     pub fn new(id: usize) -> Self {
         Node {
@@ -62,7 +62,7 @@ where
     pub fn set_node(&mut self, node: &Node<T>, constraints: &Nodes<T>) {
         // should be more generic but ... meh
         if self.children.is_empty() && node.children.is_empty() {
-            self.value = node.value;
+            self.value = node.value.clone();
         } else if !self.children.is_empty() && !node.children.is_empty() {
             if constraints
                 .intermediate
@@ -73,22 +73,21 @@ where
                 return;
             }
         } else {
-            return
+            return;
         }
-        self.value = node.value;
+        self.value = node.value.clone();
     }
 }
 
-
 pub fn set_single_node_by_id<T>(root: &Node<T>, node: &Node<T>, id: usize, constraints: &Nodes<T>)
-where T: Debug+Default+PartialEq+Clone
+where
+    T: Debug + Default + PartialEq + Clone,
 {
     let result_node = get_node_by_id(root, id);
     if let Some(val) = get_node_by_id(root, id) {
         val.set_node(node, constraints);
     }
 }
-
 
 pub fn get_node_count<T>(node: &Node<T>) -> usize {
     let mut ret = 1;
@@ -102,8 +101,10 @@ pub fn get_node_count<T>(node: &Node<T>) -> usize {
 }
 
 pub fn get_node_by_id<T>(root: &Node<T>, search_id: usize) -> Option<Node<T>> {
+    let t : Node<T> = *root.clone();
     if root.id == search_id {
-        return Some(*root);
+        let t = *root.clone();
+        return Some(t);
     }
 
     let mut que: VecDeque<&Node<T>> = VecDeque::new();

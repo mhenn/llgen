@@ -52,11 +52,11 @@ pub fn ramped_half_half<T>(
     size: usize,
     nodes: &Nodes<T>,
     config: &Settings,
-) -> Vec<Individual<Node<T>>>
+) -> Vec<Individual<T>>
 where
-    T: Debug + Copy + Default,
+    T: Debug + Copy + Default + PartialEq,
 {
-    let mut chroms: Vec<Individual<Node<T>>> = vec![];
+    let mut chroms: Vec<Individual<T>> = vec![];
     for x in 0..size {
         let typ = x < size / 2;
         let depth = config.population.tree_depth;
@@ -81,7 +81,7 @@ pub fn gen_rnd_expr_tree<T>(
     counter: &mut Counter,
 ) -> Option<Node<T>>
 where
-    T: Debug + Copy + Default,
+    T: Debug + Copy + Default + PartialEq,
 {
     let id = counter.increment_id();
     let mut expr: Node<T> = Node::new(id);
@@ -115,7 +115,7 @@ pub fn gen_rnd_expr<T>(
     is_grow: bool,
 ) -> Vec<T>
 where
-    T: Copy,
+    T: Copy+PartialEq,
 {
     let mut expr: Vec<T> = vec![];
     let ind: usize = nodes.leafs.len() / (nodes.leafs.len() + nodes.intermediate.len());
@@ -184,6 +184,16 @@ fn gen_tree_node_count() {
 
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
+
+#[test]
+fn gen_tree_nodes_double() {
+    let expr = get_test_tree();
+    print!("{:?}", expr);
+    println!("{:?}", expr.clone());
+
+    assert!(false);
+}
+
 
 #[test]
 fn gen_tree_to_xml() {
