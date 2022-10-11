@@ -186,21 +186,11 @@ fn gen_tree_node_count() {
 }
 
 #[test]
-fn gen_tree_nodes_double() {
-    let expr = get_test_tree();
-    print!("{:?}", expr);
-    println!("{:?}", expr.clone());
-
-    assert!(false);
-}
-
-
-#[test]
 fn gen_tree_to_xml() {
     let start = Instant::now();
     let expr = get_test_tree();
     print!("{:?}", expr);
-    let mut xml = to_xml(&expr, &get_xml_delims());
+    let xml = to_xml(&expr, &get_xml_delims());
     let xml: String = xml.into_iter().collect();
     println!("{:?}", xml);
     let duration = start.elapsed();
