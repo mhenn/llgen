@@ -13,10 +13,7 @@ pub struct Generation<T> {
     pub size: usize,
     pub individuals: Vec<Individual<T>>,
 }
-pub fn node_crossover<T>(
-    first: Individual<T>,
-    second: Individual<T>,
-) -> IndividualTuple<T> {
+pub fn node_crossover<T>(first: Individual<T>, second: Individual<T>) -> IndividualTuple<T> {
     let node_count_first = get_node_count(&first.chromosome);
     let node_count_second = get_node_count(&second.chromosome);
     let end = if node_count_first > node_count_second {
@@ -28,8 +25,7 @@ pub fn node_crossover<T>(
     let node = get_node_by_id(&first.chromosome, nr);
 
     //1. set node for each individual
-    IndividualTuple{first , second}
-
+    IndividualTuple { first, second }
 
     //2. return tuple
 }
@@ -57,10 +53,12 @@ where
 {
     let i1 = individuals
         .choose_weighted(&mut thread_rng(), |item| item.fitness_percentage)
-        .unwrap().clone();
+        .unwrap()
+        .clone();
     let i2 = individuals
         .choose_weighted(&mut thread_rng(), |item| item.fitness_percentage)
-        .unwrap().clone();
+        .unwrap()
+        .clone();
     IndividualTuple {
         first: i1,
         second: i2,

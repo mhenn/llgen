@@ -48,11 +48,7 @@ where
     expr
 }
 
-pub fn ramped_half_half<T>(
-    size: usize,
-    nodes: &Nodes<T>,
-    config: &Settings,
-) -> Vec<Individual<T>>
+pub fn ramped_half_half<T>(size: usize, nodes: &Nodes<T>, config: &Settings) -> Vec<Individual<T>>
 where
     T: Debug + Copy + Default + PartialEq,
 {
@@ -115,7 +111,7 @@ pub fn gen_rnd_expr<T>(
     is_grow: bool,
 ) -> Vec<T>
 where
-    T: Copy+PartialEq,
+    T: Copy + PartialEq,
 {
     let mut expr: Vec<T> = vec![];
     let ind: usize = nodes.leafs.len() / (nodes.leafs.len() + nodes.intermediate.len());

@@ -43,7 +43,7 @@ pub struct Node<T> {
 
 impl<T> Node<T>
 where
-    T: Debug+  Default + Clone +  PartialEq,
+    T: Debug + Default + Clone + PartialEq,
 {
     pub fn new(id: usize) -> Self {
         Node {
@@ -99,9 +99,8 @@ pub fn get_node_count<T>(node: &Node<T>) -> usize {
     ret
 }
 
-pub fn get_node_by_id<T>(root:&Node<T>, search_id: usize) -> Option<Node<T>> {
+pub fn get_node_by_id<T>(root: &Node<T>, search_id: usize) -> Option<Node<T>> {
     if root.id == search_id {
-
         return Some(root.clone());
     }
 
