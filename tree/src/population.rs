@@ -1,5 +1,7 @@
 #![allow(dead_code, unused)]
 
+use std::sync::Arc;
+
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use crate::{
@@ -13,7 +15,9 @@ pub struct Generation<T> {
     pub size: usize,
     pub individuals: Vec<Individual<T>>,
 }
-pub fn node_crossover<T>(first: Individual<T>, second: Individual<T>) -> IndividualTuple<T> {
+pub fn node_crossover<T>(first: Individual<T>, second: Individual<T>) -> IndividualTuple<T>
+    where T: Clone
+{
     let node_count_first = get_node_count(&first.chromosome);
     let node_count_second = get_node_count(&second.chromosome);
     let end = if node_count_first > node_count_second {
@@ -21,13 +25,18 @@ pub fn node_crossover<T>(first: Individual<T>, second: Individual<T>) -> Individ
     } else {
         node_count_second
     };
+
     let nr = thread_rng().gen_range(0..end);
-    let node = get_node_by_id(&first.chromosome, nr);
+    let leee: Box<Node<T>> = Box::new(first.chromosome.clone());
+    let node = get_node_by_id(leee, nr);
 
     //1. set node for each individual
     IndividualTuple { first, second }
 
     //2. return tuple
+
+
+
 }
 //
 //pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
