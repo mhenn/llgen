@@ -18,8 +18,13 @@ pub enum NodeType<T> {
 }
 
 impl Counter {
+
+    pub fn default() -> Self{
+        Self::new()
+    }
+
     pub fn new() -> Counter {
-        Counter { id: 0 }
+        Counter { id: Default::default() }
     }
 
     pub fn increment_id(&mut self) -> usize {
@@ -142,4 +147,5 @@ where
     for u in node.children.iter() {
         dfs_rec(u.clone());
     }
+
 }
