@@ -1,5 +1,5 @@
-use rand::Rng;
-use std::collections::HashMap;
+
+
 
 use crate::{
     constraints::get_nodes,
@@ -38,7 +38,7 @@ fn ramped_hh() {
     let nodes = get_nodes();
     let size = 10;
     let config = Settings::new().unwrap();
-    let ret = ramped_half_half(size, &nodes, &config);
+    let _ret = ramped_half_half(size, &nodes, &config);
 }
 
 #[test]

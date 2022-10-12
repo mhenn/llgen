@@ -1,5 +1,5 @@
 use crate::{constraints::*, nodes::*, population::*, settings::*};
-use rand::{rngs::ThreadRng, seq::SliceRandom, Rng};
+use rand::{seq::SliceRandom, Rng};
 
 pub fn to_list<T>(node: &Node<T>, delimeter: &(T, T)) -> Vec<T>
 where
@@ -147,10 +147,7 @@ where
 }
 
 use std::{
-    collections::VecDeque,
-    fmt::Debug,
-    fs,
-    time::{Duration, Instant},
+    fmt::Debug, time::Instant,
 };
 
 pub fn get_test_tree<'a>() -> Node<&'a str> {
@@ -192,7 +189,6 @@ fn gen_tree_to_xml() {
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
-
 #[test]
 fn gen_full_tree() {
     let start = Instant::now();
