@@ -128,7 +128,6 @@ where T: Debug + Clone + Default + PartialEq
     }
 }
 
-
 pub fn get_node_count<T>(node: &Node<T>) -> usize {
     let mut ret = 1;
     if node.children.is_empty() {

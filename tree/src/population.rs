@@ -8,7 +8,7 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 use crate::{
     constraints::get_nodes,
     init::{get_test_tree, get_test_tree_with},
-    nodes::{get_node_by_id, get_node_count, set_single_node_by_id, Node, Nodes},
+    nodes::{get_node_by_id, get_node_count, set_single_node_by_id, Node, Nodes, set_node_by_id},
     settings::Settings,
 };
 
@@ -20,13 +20,12 @@ pub struct Generation<T> {
 
 pub fn node_crossover<T>(
     first: Node<T>,
-    second:  Node<T>,
+    mut second:  Node<T>,
     constraints: &Nodes<T>,
 ) -> (Node<T>, Node<T>, usize)
 where
     T: Debug + Clone + PartialEq + Default,
 {
-    let mut second = second;
     let node_count_first = get_node_count(&first);
     let node_count_second = get_node_count(&second);
     let end = if node_count_first > node_count_second {
@@ -38,7 +37,7 @@ where
     let nr = thread_rng().gen_range(0..end);
     let boxed_node: Box<Node<T>> = Box::new(first.clone());
     if let Some(node) = get_node_by_id(&boxed_node, nr) {
-        second = set_single_node_by_id(&second, &node, nr, constraints);
+        set_node_by_id(&mut second, &node, nr, constraints);
     }
     //   let boxed_node: Box<Node<T>> = Box::new(second.clone());
     //   if let Some(node) = get_node_by_id(boxed_node, nr) {
