@@ -62,7 +62,7 @@ where
                 chromosome: tree,
                 fitness: 0.0,
                 fitness_percentage: 0.0,
-                id: x,
+         //       id: x,
             });
         }
     }
@@ -146,9 +146,7 @@ where
     expr
 }
 
-use std::{
-    fmt::Debug, time::Instant,
-};
+use std::{fmt::Debug, time::Instant};
 
 pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();

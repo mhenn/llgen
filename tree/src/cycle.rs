@@ -1,6 +1,3 @@
-
-
-
 use crate::{
     constraints::get_nodes,
     init::ramped_half_half,

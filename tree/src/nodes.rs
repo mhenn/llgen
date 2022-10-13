@@ -18,13 +18,14 @@ pub enum NodeType<T> {
 }
 
 impl Counter {
-
-    pub fn default() -> Self{
+    pub fn default() -> Self {
         Self::new()
     }
 
     pub fn new() -> Counter {
-        Counter { id: Default::default() }
+        Counter {
+            id: Default::default(),
+        }
     }
 
     pub fn increment_id(&mut self) -> usize {
@@ -107,7 +108,7 @@ pub fn get_node_count<T>(node: &Node<T>) -> usize {
 
 pub fn get_node_by_id<T>(root: Box<Node<T>>, search_id: usize) -> Option<Box<Node<T>>>
 where
-    T: Clone
+    T: Clone,
 {
     if root.id == search_id {
         return Some(root);
@@ -147,5 +148,4 @@ where
     for u in node.children.iter() {
         dfs_rec(u.clone());
     }
-
 }

@@ -13,7 +13,6 @@ pub struct Grammar<'a> {
     pub rules: HashMap<&'a str, Vec<Vec<&'a str>>>,
     pub start: &'a str,
     pub non_terms: HashMap<&'a str, bool>,
-
 }
 
 pub enum NodeType {
@@ -49,21 +48,21 @@ impl<'a> Grammar<'a> {
         }
     }
 
-      pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
-        for (i,el) in word.iter().enumerate(){
-           if self.non_terms.get(el).is_some(){
+    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
+        for (i, el) in word.iter().enumerate() {
+            if self.non_terms.get(el).is_some() {
                 return Some(i);
-           }
+            }
         }
         None
-      }
+    }
 
-//    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
-//        if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
-//            return word.iter().position(|x| x == nt);
-//        }
-//        None
-//    }
+    //    pub fn get_next_nt_in(&self, word: &Vec<&str>) -> Option<usize> {
+    //        if let Some(nt) = word.iter().find(|x| self.non_terminals.contains(x)) {
+    //            return word.iter().position(|x| x == nt);
+    //        }
+    //        None
+    //    }
 
     pub fn fill_word(&self, word: Vec<&str>) {}
 
@@ -106,7 +105,6 @@ pub fn get_bt_grammar<'a>() -> Grammar<'a> {
         ],
     );
     map.insert("ACT", vec![vec!["pickup"], vec!["putdown"]]);
-
 
     let mut nt = HashMap::new();
     nt.insert("ROOT", true);

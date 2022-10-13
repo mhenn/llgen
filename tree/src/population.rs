@@ -7,8 +7,8 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use crate::{
     constraints::get_nodes,
-    nodes::{get_node_by_id, get_node_count, Node, Nodes, set_single_node_by_id},
-    settings::Settings,
+    nodes::{get_node_by_id, get_node_count, set_single_node_by_id, Node, Nodes},
+    settings::Settings, init::get_test_tree,
 };
 
 #[derive(Default)]
@@ -17,36 +17,37 @@ pub struct Generation<T> {
     pub individuals: Vec<Individual<T>>,
 }
 
-
-
-
-pub fn node_crossover<T>(first: Individual<T>, second: Individual<T>, constraints: &Nodes<T>) -> IndividualTuple<T>
-    where T: Debug + Clone + PartialEq + Default
+pub fn node_crossover<T>(
+    first: Node<T>,
+    second: Node<T>,
+    constraints: &Nodes<T>,
+) -> (Node<T>,Node<T>, usize)
+where
+    T: Debug + Clone + PartialEq + Default,
 {
-    let first_root = first.chromosome.clone();
-    let second_root = second.chromosome.clone();
-    let node_count_first = get_node_count(&first_root);
-    let node_count_second = get_node_count(&second_root);
+    let node_count_first = get_node_count(&first);
+    let node_count_second = get_node_count(&second);
     let end = if node_count_first > node_count_second {
-        node_count_first
-    } else {
         node_count_second
+    } else {
+        node_count_first
     };
 
     let nr = thread_rng().gen_range(0..end);
-    let boxed_node: Box<Node<T>> = Box::new(first_root.clone());
+    let boxed_node: Box<Node<T>> = Box::new(first.clone());
     if let Some(node) = get_node_by_id(boxed_node, nr) {
-        set_single_node_by_id(&first_root, &node, nr, constraints);
+        set_single_node_by_id(&first, &node, nr, constraints);
+    }
+    let boxed_node: Box<Node<T>> = Box::new(second.clone());
+    if let Some(node) = get_node_by_id(boxed_node, nr) {
+        set_single_node_by_id(&second, &node, nr, constraints);
     }
 
     //1. set node for each individual
 
-
     //2. return tuple
 
-
-    IndividualTuple { first, second }
-
+    (first, second ,nr)
 }
 //
 //pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
@@ -139,16 +140,45 @@ pub struct IndividualTuple<T> {
     pub second: Individual<T>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Individual<T> {
     pub chromosome: Node<T>,
     pub fitness: f64,
     pub fitness_percentage: f64,
-    pub id: usize,
 }
 
-impl<T> Individual<T> {
+impl<T> Individual<T>
+where
+    T: Default,
+{
+    pub fn new(chromosome: Node<T>) -> Self {
+        Self {
+            chromosome,
+            ..Default::default()
+        }
+    }
+
     pub fn mutate(&mut self, mutation: fn(&Individual<T>) -> Individual<T>) -> Self {
         mutation(self)
     }
 }
+
+#[test]
+fn gen_tree_node_count() {
+    let constraints = get_nodes();
+    let expr1 = get_test_tree();
+    let expr2 = get_test_tree();
+    print!("{:?}", expr1);
+    println!();
+    println!("{:?}", expr2);
+    let (expr1, expr2, nr) = node_crossover(expr1, expr2, &constraints);
+
+    println!("{:?}", nr);
+    println!("{:?}", expr1);
+    println!();
+    println!("{:?}", expr2);
+    assert!(false)
+
+}
+
+

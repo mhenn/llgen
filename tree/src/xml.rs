@@ -1,7 +1,5 @@
 use crate::{constraints::get_nodes, settings::Settings};
 
-
-
 #[test]
 fn get_grow() {
     let nodes = get_nodes();

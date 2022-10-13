@@ -1,8 +1,8 @@
 #![allow(dead_code, unused)]
 
-use std::collections::VecDeque;
-use rand::{distributions::Uniform, Rng};
 use crate::grammar::*;
+use rand::{distributions::Uniform, Rng};
+use std::collections::VecDeque;
 
 #[derive(Clone)]
 pub struct GNode<T> {
@@ -24,9 +24,7 @@ impl<T> GNode<T> {
 }
 
 fn only_terminals(grammar: &Grammar, ls: &Vec<&str>) -> bool {
-    let contains = ls
-        .iter()
-        .any(|x| grammar.non_terms.get(x).is_some());//matches!(grammar.check_membership(x), Ok(NodeType::NonTerminal)));
+    let contains = ls.iter().any(|x| grammar.non_terms.get(x).is_some()); //matches!(grammar.check_membership(x), Ok(NodeType::NonTerminal)));
     !contains
 }
 
@@ -40,7 +38,8 @@ pub fn grow_full<'a>(
     let mut words: Vec<(Vec<usize>, Vec<&str>)> = vec![];
     for _ in 0..amount {
         let min_val = rand::thread_rng().gen_range(min..=max);
-        if let Some(val) = tree_growth(grammar, (vec![], vec![starting_symbol]), grow_cond, min_val) {
+        if let Some(val) = tree_growth(grammar, (vec![], vec![starting_symbol]), grow_cond, min_val)
+        {
             words.push(tree_growth(grammar, val, full_cond, min).unwrap())
         }
     }
@@ -69,7 +68,7 @@ pub fn tree_growth<'a>(
         if condition(&current_word, pos, min) {
             return Some((decisions, current_word));
         }
-        if pos.is_none(){
+        if pos.is_none() {
             continue;
         }
         let pos = pos.unwrap();
@@ -122,5 +121,5 @@ fn full_from_start() {
     let word = vec!["<root>", "NL", "</root>"];
     let grammar = get_bt_grammar();
     let res = tree_growth(&grammar, (vec![], word), full_cond, 1);
-   assert!(res.is_some());
+    assert!(res.is_some());
 }
