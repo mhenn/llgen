@@ -20,12 +20,13 @@ pub struct Generation<T> {
 
 pub fn node_crossover<T>(
     first: Node<T>,
-    second: Node<T>,
+    second:  Node<T>,
     constraints: &Nodes<T>,
 ) -> (Node<T>, Node<T>, usize)
 where
     T: Debug + Clone + PartialEq + Default,
 {
+    let mut second = second;
     let node_count_first = get_node_count(&first);
     let node_count_second = get_node_count(&second);
     let end = if node_count_first > node_count_second {
@@ -37,8 +38,7 @@ where
     let nr = thread_rng().gen_range(0..end);
     let boxed_node: Box<Node<T>> = Box::new(first.clone());
     if let Some(node) = get_node_by_id(&boxed_node, nr) {
-        println!("{:?}", node);
-        set_single_node_by_id(&second, &node, nr, constraints);
+        second = set_single_node_by_id(&second, &node, nr, constraints);
     }
     //   let boxed_node: Box<Node<T>> = Box::new(second.clone());
     //   if let Some(node) = get_node_by_id(boxed_node, nr) {

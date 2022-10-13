@@ -94,12 +94,40 @@ pub fn set_single_node_by_id<T>(
 where
     T: Debug + Default + PartialEq + Clone,
 {
+    println!("ayee");
+    println!("{:?}", root);
     let root: &Node<T> = &root.clone();
     if let Some(mut val) = get_node_by_id(root, id) {
         val.set_node(node, constraints);
     }
+    println!("ayee");
+    println!("{:?}", root);
+    println!("ayee");
     root.clone()
 }
+
+
+pub fn set_node_by_id<T>(root: &Node<T>, node: &Node<T>, id: usize, constraints: &Nodes<T>)
+where T: Debug + Clone + Default + PartialEq
+{
+     if root.id == id {
+        root.set_node(node, constraints);
+    }
+
+    let mut que: VecDeque<&Node<T>> = VecDeque::new();
+    que.push_front(root);
+
+    while let Some(node) = que.pop_back() {
+        for child in node.children.iter().clone() {
+            if child.id == id {
+                child.set_node(node, constraints);
+                return
+            }
+            que.push_front(child);
+        }
+    }
+}
+
 
 pub fn get_node_count<T>(node: &Node<T>) -> usize {
     let mut ret = 1;
