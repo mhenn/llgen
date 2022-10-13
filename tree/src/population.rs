@@ -19,7 +19,7 @@ pub struct Generation<T> {
 }
 
 pub fn node_crossover<T>(
-    first: Node<T>,
+    mut first: Node<T>,
     mut second:  Node<T>,
     constraints: &Nodes<T>,
 ) -> (Node<T>, Node<T>, usize)
@@ -35,14 +35,16 @@ where
     };
 
     let nr = thread_rng().gen_range(0..end);
-    let boxed_node: Box<Node<T>> = Box::new(first.clone());
-    if let Some(node) = get_node_by_id(&boxed_node, nr) {
-        set_node_by_id(&mut second, &node, nr, constraints);
+    let first_boxed: Box<Node<T>> = Box::new(first.clone());
+    let second_boxed: Box<Node<T>> = Box::new(second.clone());
+
+    let res_node1 = get_node_by_id(&first_boxed, nr);
+    let res_node2 = get_node_by_id(&second_boxed, nr);
+    if let (Some(n1), Some(n2)) = (res_node1, res_node2){
+        set_node_by_id(&mut second, &n1, nr, constraints);
+        set_node_by_id(&mut first, &n2, nr, constraints);
     }
-    //   let boxed_node: Box<Node<T>> = Box::new(second.clone());
-    //   if let Some(node) = get_node_by_id(boxed_node, nr) {
-    //       set_single_node_by_id(&second, &node, nr, constraints);
-    //   }
+
 
     //1. set node for each individual
 
