@@ -7,8 +7,9 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use crate::{
     constraints::get_nodes,
+    init::{get_test_tree, get_test_tree_with},
     nodes::{get_node_by_id, get_node_count, set_single_node_by_id, Node, Nodes},
-    settings::Settings, init::get_test_tree,
+    settings::Settings,
 };
 
 #[derive(Default)]
@@ -21,7 +22,7 @@ pub fn node_crossover<T>(
     first: Node<T>,
     second: Node<T>,
     constraints: &Nodes<T>,
-) -> (Node<T>,Node<T>, usize)
+) -> (Node<T>, Node<T>, usize)
 where
     T: Debug + Clone + PartialEq + Default,
 {
@@ -35,19 +36,20 @@ where
 
     let nr = thread_rng().gen_range(0..end);
     let boxed_node: Box<Node<T>> = Box::new(first.clone());
-    if let Some(node) = get_node_by_id(boxed_node, nr) {
-        set_single_node_by_id(&first, &node, nr, constraints);
-    }
-    let boxed_node: Box<Node<T>> = Box::new(second.clone());
-    if let Some(node) = get_node_by_id(boxed_node, nr) {
+    if let Some(node) = get_node_by_id(&boxed_node, nr) {
+        println!("{:?}", node);
         set_single_node_by_id(&second, &node, nr, constraints);
     }
+    //   let boxed_node: Box<Node<T>> = Box::new(second.clone());
+    //   if let Some(node) = get_node_by_id(boxed_node, nr) {
+    //       set_single_node_by_id(&second, &node, nr, constraints);
+    //   }
 
     //1. set node for each individual
 
     //2. return tuple
 
-    (first, second ,nr)
+    (first, second, nr)
 }
 //
 //pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
@@ -166,8 +168,8 @@ where
 #[test]
 fn gen_tree_node_count() {
     let constraints = get_nodes();
-    let expr1 = get_test_tree();
-    let expr2 = get_test_tree();
+    let expr1 = get_test_tree_with(1, 2);
+    let expr2 = get_test_tree_with(1, 2);
     print!("{:?}", expr1);
     println!();
     println!("{:?}", expr2);
@@ -178,7 +180,4 @@ fn gen_tree_node_count() {
     println!();
     println!("{:?}", expr2);
     assert!(false)
-
 }
-
-

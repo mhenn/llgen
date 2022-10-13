@@ -85,14 +85,20 @@ where
     }
 }
 
-pub fn set_single_node_by_id<T>(root: &Node<T>, node: &Node<T>, id: usize, constraints: &Nodes<T>)
+pub fn set_single_node_by_id<T>(
+    root: &Node<T>,
+    node: &Node<T>,
+    id: usize,
+    constraints: &Nodes<T>,
+) -> Node<T>
 where
     T: Debug + Default + PartialEq + Clone,
 {
-    let root: Box<Node<T>> = Box::new(root.clone());
+    let root: &Node<T> = &root.clone();
     if let Some(mut val) = get_node_by_id(root, id) {
         val.set_node(node, constraints);
     }
+    root.clone()
 }
 
 pub fn get_node_count<T>(node: &Node<T>) -> usize {
@@ -106,23 +112,23 @@ pub fn get_node_count<T>(node: &Node<T>) -> usize {
     ret
 }
 
-pub fn get_node_by_id<T>(root: Box<Node<T>>, search_id: usize) -> Option<Box<Node<T>>>
+pub fn get_node_by_id<T>(root: &Node<T>, search_id: usize) -> Option<Node<T>>
 where
     T: Clone,
 {
     if root.id == search_id {
-        return Some(root);
+        return Some(root.clone());
     }
 
-    let mut que: VecDeque<Box<Node<T>>> = VecDeque::new();
-    que.push_front(root);
+    let mut que: VecDeque<Node<T>> = VecDeque::new();
+    que.push_front(root.clone());
 
     while let Some(node) = que.pop_back() {
         for child in node.children.iter().clone() {
             if child.id == search_id {
-                return Some(Box::new(child.clone()));
+                return Some(child.clone());
             }
-            que.push_front(Box::new(child.clone()));
+            que.push_front(child.clone());
         }
     }
     None

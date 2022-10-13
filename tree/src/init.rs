@@ -62,7 +62,7 @@ where
                 chromosome: tree,
                 fitness: 0.0,
                 fitness_percentage: 0.0,
-         //       id: x,
+                //       id: x,
             });
         }
     }
@@ -152,6 +152,11 @@ pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();
     let depth = 3;
     let width = 3;
+    gen_rnd_expr_tree(&nodes, depth, width, false, &mut Counter::new()).unwrap()
+}
+
+pub fn get_test_tree_with<'a>(depth: usize, width: u8) -> Node<&'a str> {
+    let nodes = get_nodes();
     gen_rnd_expr_tree(&nodes, depth, width, false, &mut Counter::new()).unwrap()
 }
 
