@@ -106,11 +106,15 @@ where
     root.clone()
 }
 
-
-pub fn set_node_by_id<T>(root: &mut Node<T>, node_to_set : &Node<T>, id: usize, constraints: &Nodes<T>)
-where T: Debug + Clone + Default + PartialEq
+pub fn set_node_by_id<T>(
+    root: &mut Node<T>,
+    node_to_set: &Node<T>,
+    id: usize,
+    constraints: &Nodes<T>,
+) where
+    T: Debug + Clone + Default + PartialEq,
 {
-     if root.id == id {
+    if root.id == id {
         root.set_node(node_to_set, constraints);
     }
 
@@ -121,7 +125,7 @@ where T: Debug + Clone + Default + PartialEq
         for child in node.children.iter_mut() {
             if child.id == id {
                 child.set_node(node_to_set, constraints);
-                return
+                return;
             }
             que.push_front(child);
         }

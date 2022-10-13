@@ -1,14 +1,13 @@
 #![allow(dead_code, unused)]
 
 use std::fmt::Debug;
-use std::sync::Arc;
 
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use crate::{
     constraints::get_nodes,
     init::{get_test_tree, get_test_tree_with},
-    nodes::{get_node_by_id, get_node_count, set_single_node_by_id, Node, Nodes, set_node_by_id},
+    nodes::{get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id, Node, Nodes},
     settings::Settings,
 };
 
@@ -18,11 +17,17 @@ pub struct Generation<T> {
     pub individuals: Vec<Individual<T>>,
 }
 
+pub fn get_shortest_tree_count<T>(first: &Node<T>, second: &Node<T>)
+where
+    T: Debug + Clone + PartialEq + Default,
+{
+}
+
 pub fn node_crossover<T>(
     mut first: Node<T>,
-    mut second:  Node<T>,
+    mut second: Node<T>,
     constraints: &Nodes<T>,
-) -> (Node<T>, Node<T>, usize)
+) -> (Node<T>, Node<T>)
 where
     T: Debug + Clone + PartialEq + Default,
 {
@@ -40,22 +45,17 @@ where
 
     let res_node1 = get_node_by_id(&first_boxed, nr);
     let res_node2 = get_node_by_id(&second_boxed, nr);
-    if let (Some(n1), Some(n2)) = (res_node1, res_node2){
+    if let (Some(n1), Some(n2)) = (res_node1, res_node2) {
         set_node_by_id(&mut second, &n1, nr, constraints);
         set_node_by_id(&mut first, &n2, nr, constraints);
     }
 
-
-    //1. set node for each individual
-
-    //2. return tuple
-
-    (first, second, nr)
+    (first, second)
 }
-//
-//pub fn subtree_crossover<T>(first: Individual<T>,second: Individual<T>) -> Individual<T>{
-//
-//}
+
+pub fn subtree_crossover<T>(mut first: Node<T>, mut second: Node<T>) -> (Node<T>, Node<T>) {
+    (first, second)
+}
 
 pub fn tree_crossover<T>(
     first: Individual<T>,
@@ -180,5 +180,4 @@ fn gen_tree_node_count() {
     println!("{:?}", expr1);
     println!();
     println!("{:?}", expr2);
-    assert!(false)
 }
