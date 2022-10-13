@@ -107,20 +107,20 @@ where
 }
 
 
-pub fn set_node_by_id<T>(root: &Node<T>, node: &Node<T>, id: usize, constraints: &Nodes<T>)
+pub fn set_node_by_id<T>(root: &mut Node<T>, node_to_set : &Node<T>, id: usize, constraints: &Nodes<T>)
 where T: Debug + Clone + Default + PartialEq
 {
      if root.id == id {
-        root.set_node(node, constraints);
+        root.set_node(node_to_set, constraints);
     }
 
-    let mut que: VecDeque<&Node<T>> = VecDeque::new();
+    let mut que: VecDeque<&mut Node<T>> = VecDeque::new();
     que.push_front(root);
 
     while let Some(node) = que.pop_back() {
-        for child in node.children.iter().clone() {
+        for child in node.children.iter_mut() {
             if child.id == id {
-                child.set_node(node, constraints);
+                child.set_node(node_to_set, constraints);
                 return
             }
             que.push_front(child);
