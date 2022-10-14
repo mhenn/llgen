@@ -17,10 +17,33 @@ pub struct Generation<T> {
     pub individuals: Vec<Individual<T>>,
 }
 
-pub fn get_shortest_tree_count<T>(first: &Node<T>, second: &Node<T>)
+pub fn get_shortest_tree_len<T>(first: &Node<T>, second: &Node<T>) -> usize
 where
     T: Debug + Clone + PartialEq + Default,
 {
+    let node_count_first = get_node_count(first);
+    let node_count_second = get_node_count(second);
+    if node_count_first > node_count_second {
+        node_count_second
+    } else {
+        node_count_first
+    }
+}
+
+pub fn get_nodes_from_trees<T>(
+    first: &Node<T>,
+    second: &Node<T>,
+    id: usize,
+) -> (Option<Node<T>>, Option<Node<T>>)
+where
+    T: Debug + Clone + PartialEq + Default,
+{
+    let first_boxed: Box<Node<T>> = Box::new(first.clone());
+    let second_boxed: Box<Node<T>> = Box::new(second.clone());
+
+    let res1 = get_node_by_id(&first_boxed, id);
+    let res2 = get_node_by_id(&second_boxed, id);
+    (res1, res2)
 }
 
 pub fn node_crossover<T>(
@@ -31,29 +54,25 @@ pub fn node_crossover<T>(
 where
     T: Debug + Clone + PartialEq + Default,
 {
-    let node_count_first = get_node_count(&first);
-    let node_count_second = get_node_count(&second);
-    let end = if node_count_first > node_count_second {
-        node_count_second
-    } else {
-        node_count_first
-    };
-
-    let nr = thread_rng().gen_range(0..end);
-    let first_boxed: Box<Node<T>> = Box::new(first.clone());
-    let second_boxed: Box<Node<T>> = Box::new(second.clone());
-
-    let res_node1 = get_node_by_id(&first_boxed, nr);
-    let res_node2 = get_node_by_id(&second_boxed, nr);
+    let end = get_shortest_tree_len(&first, &second);
+    let id = thread_rng().gen_range(0..end);
+    let (res_node1, res_node2) = get_nodes_from_trees(&first, &second, id);
     if let (Some(n1), Some(n2)) = (res_node1, res_node2) {
-        set_node_by_id(&mut second, &n1, nr, constraints);
-        set_node_by_id(&mut first, &n2, nr, constraints);
+        set_node_by_id(&mut second, &n1, id, constraints);
+        set_node_by_id(&mut first, &n2, id, constraints);
     }
-
     (first, second)
 }
 
-pub fn subtree_crossover<T>(mut first: Node<T>, mut second: Node<T>) -> (Node<T>, Node<T>) {
+pub fn subtree_crossover<T>(mut first: Node<T>, mut second: Node<T>) -> (Node<T>, Node<T>)
+where
+    T: Debug + Clone + PartialEq + Default,
+{
+    let end = get_shortest_tree_len(&first, &second);
+    let id = thread_rng().gen_range(0..end);
+
+    let (res_node1, res_node2) = get_nodes_from_trees(&first, &second, id);
+
     (first, second)
 }
 
@@ -174,9 +193,8 @@ fn gen_tree_node_count() {
     print!("{:?}", expr1);
     println!();
     println!("{:?}", expr2);
-    let (expr1, expr2, nr) = node_crossover(expr1, expr2, &constraints);
+    let (expr1, expr2) = node_crossover(expr1, expr2, &constraints);
 
-    println!("{:?}", nr);
     println!("{:?}", expr1);
     println!();
     println!("{:?}", expr2);
