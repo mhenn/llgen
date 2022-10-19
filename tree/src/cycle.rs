@@ -13,7 +13,7 @@ pub fn evolution_cycle<T>(
     evaluate: fn(&Generation<T>),
     //    crop: fn(f64, &Individual<T>) -> bool,
     //    mutation: fn(&Individual<T>) -> Individual<T>,
-    //    combine: fn(&Vec<Individual<T>>, usize) -> Vec<Individual<T>>,
+    combine: fn(&Vec<Individual<T>>, usize) -> Vec<Individual<T>>,
 ) where
     T: Copy + Clone + Default,
 {
@@ -22,7 +22,7 @@ pub fn evolution_cycle<T>(
     let mut pop = Generation::new(pop_size);
     pop.populate(nodes, &settings, init);
     evaluate(&pop);
-    //    pop.crossover(&settings, combine, selection)
+    pop.crossover(&settings, combine, selection)
     //    pop.mutate(mutation);
 }
 

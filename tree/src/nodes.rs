@@ -65,6 +65,11 @@ where
         bfs_rec(&mut q);
     }
 
+    pub fn set_subtree(&mut self, node: &Node<T>){
+        self.value = node.value.clone();
+        self.children = node.children.clone();
+    }
+
     pub fn set_node(&mut self, node: &Node<T>, constraints: &Nodes<T>) {
         // should be more generic but ... meh
         if self.children.is_empty() && node.children.is_empty() {
@@ -94,16 +99,38 @@ pub fn set_single_node_by_id<T>(
 where
     T: Debug + Default + PartialEq + Clone,
 {
-    println!("ayee");
-    println!("{:?}", root);
     let root: &Node<T> = &root.clone();
     if let Some(mut val) = get_node_by_id(root, id) {
         val.set_node(node, constraints);
     }
-    println!("ayee");
-    println!("{:?}", root);
-    println!("ayee");
     root.clone()
+}
+
+pub fn set_subtree_by_node_id<T>(root: &mut Node<T>, node_to_set: &Node<T>, id: usize) -> Option<Node<T>>
+where
+    T: Debug + Clone + Default + PartialEq,
+{
+
+    if root.id == id{
+        let ret = root.clone();
+        root.set_subtree(node_to_set);
+        return Some(ret)
+    }
+
+    let mut que: VecDeque<&mut Node<T>> = VecDeque::new();
+    que.push_front(root);
+
+    while let Some(node) = que.pop_back() {
+        for child in node.children.iter_mut() {
+            if child.id == id {
+                let ret = child.clone();
+                child.set_subtree(node_to_set);
+                return Some(ret)
+            }
+            que.push_front(child);
+        }
+    }
+    None
 }
 
 pub fn set_node_by_id<T>(

@@ -7,7 +7,7 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 use crate::{
     constraints::get_nodes,
     init::{get_test_tree, get_test_tree_with},
-    nodes::{get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id, Node, Nodes},
+    nodes::{get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id, Node, Nodes, set_subtree_by_node_id},
     settings::Settings,
 };
 
@@ -71,7 +71,10 @@ where
     let end = get_shortest_tree_len(&first, &second);
     let id = thread_rng().gen_range(0..end);
 
-    let (res_node1, res_node2) = get_nodes_from_trees(&first, &second, id);
+    if let (Some(res_node1), Some(res_node2)) = get_nodes_from_trees(&first, &second, id){
+        let cut_subtree = set_subtree_by_node_id(&mut first, &res_node2, id);
+        set_subtree_by_node_id(&mut second, &res_node1, id);
+    }
 
     (first, second)
 }
@@ -80,12 +83,16 @@ pub fn tree_crossover<T>(
     first: Individual<T>,
     second: Individual<T>,
     offspring: usize,
-) -> Vec<Individual<T>> {
+) -> Vec<Individual<T>>
+where
+    T: Default + Clone + PartialEq +Debug
+{
     let mut ret: Vec<Individual<T>> = vec![];
-    for _ in 0..offspring {
-        //        ret.push(node_crossover(first, second));
+    for _ in (0..offspring).step_by(2) {
+        let (first, second) = subtree_crossover(first.chromosome, second.chromosome);
+        ret.push(Individual::new(first));
+        ret.push(Individual::new(second));
     }
-    // ret.push(subtree_crossover(first, second));
     ret
 }
 
@@ -186,7 +193,21 @@ where
 }
 
 #[test]
-fn gen_tree_node_count() {
+fn gen_tree_tree_crossover() {
+    let expr1 = get_test_tree_with(2, 3);
+    let expr2 = get_test_tree_with(2, 3);
+    print!("{:?}", expr1);
+    println!();
+    println!("{:?}", expr2);
+    let (expr1, expr2) = subtree_crossover(expr1, expr2, );
+    println!();
+
+    println!("{:?}", expr1);
+    println!("{:?}", expr2);
+}
+
+#[test]
+fn gen_tree_node_crossover() {
     let constraints = get_nodes();
     let expr1 = get_test_tree_with(1, 2);
     let expr2 = get_test_tree_with(1, 2);
