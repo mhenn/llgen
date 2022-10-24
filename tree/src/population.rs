@@ -88,15 +88,15 @@ where
     T: Default + Clone + PartialEq +Debug
 {
     let mut ret: Vec<Individual<T>> = vec![];
-    for _ in (0..offspring).step_by(2) {
+    //for _ in (0..offspring).step_by(2) {
         let (first, second) = subtree_crossover(first.chromosome, second.chromosome);
         ret.push(Individual::new(first));
         ret.push(Individual::new(second));
-    }
+    //}
     ret
 }
 
-pub fn roulette_wheel<T>(individuals: Vec<Individual<T>>) -> IndividualTuple<T>
+pub fn roulette_wheel<T>(individuals: &Vec<Individual<T>>) -> IndividualTuple<T>
 where
     T: Copy,
 {
@@ -148,6 +148,12 @@ where
     pub fn sort_by_fitness(&mut self) {
         self.individuals
             .sort_by(|a, b| b.fitness.total_cmp(&a.fitness));
+    }
+
+    pub fn set_fitness_percentages(&mut self){
+        let max: f64 =  self.individuals.iter().fold(0.0 ,|acc, f| acc + f.fitness ) /self.individuals.len() as f64;
+        let inds = self.individuals.clone();
+        self.individuals  = inds.into_iter().map(|mut f|{ f.fitness_percentage = (f.fitness  / max)   ; f }).collect();
     }
 
     pub fn crossover(
