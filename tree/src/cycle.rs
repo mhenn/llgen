@@ -26,9 +26,6 @@ pub fn evolution_cycle<T>(
     pop.populate(nodes, &settings, init);
     evaluate(&mut pop.individuals);
     pop.set_fitness_percentages();
-    println!("{:?}", pop.individuals[0].fitness);
-    println!("{:?}", pop.individuals[0].fitness_percentage);
-    println!("{:?}", pop.individuals[0].fitness);
     pop.crossover(2, combine, selection)
     //    pop.mutate(mutation);
 }
@@ -36,7 +33,8 @@ pub fn evolution_cycle<T>(
 pub fn evaluate<T>( inds: &mut Vec<Individual<T>>) {
    for chromosome in inds.iter_mut(){
 
-        chromosome.fitness =  rand::thread_rng().gen_range(0..100) as f64;
+        chromosome.fitness =  rand::thread_rng().gen_range(1..100) as f64;
+        println!("R: {:?}", chromosome.fitness);
    }
 }
 pub fn crop<T>(pop_fitness: f64, ind: &Individual<T>) -> bool {

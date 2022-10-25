@@ -100,8 +100,9 @@ pub fn roulette_wheel<T>(individuals: &Vec<Individual<T>>) -> IndividualTuple<T>
 where
     T: Copy,
 {
+    println!("len: {:?}", individuals.len());
     let i1 = individuals
-        .choose_weighted(&mut thread_rng(), |item| item.fitness_percentage)
+        .choose_weighted(&mut thread_rng(), |item| {println!("{:?}", item.fitness); item.fitness_percentage})
         .unwrap()
         .clone();
     let i2 = individuals
@@ -163,9 +164,10 @@ where
         selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
     ) {
         let end = self.size / offspring;
+        let mut new_inds: Vec<Individual<T>>;
         for _ in 0..end {
             let parents = selection(&self.individuals);
-            self.individuals = combine(parents.first, parents.second, offspring);
+            new_inds = combine(parents.first, parents.second, offspring);
         }
     }
 }
