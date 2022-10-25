@@ -151,6 +151,13 @@ where
             .sort_by(|a, b| b.fitness.total_cmp(&a.fitness));
     }
 
+    pub fn select_elites(&mut self, percentage: f64) -> Vec<Individual<T>>{
+        self.sort_by_fitness();
+        let inds = self.individuals.clone();
+        inds.into_iter().take((self.size as f64 * percentage) as usize).collect()
+    }
+
+
     pub fn set_fitness_percentages(&mut self){
         let max: f64 =  self.individuals.iter().fold(0.0 ,|acc, f| acc + f.fitness ) /self.individuals.len() as f64;
         let inds = self.individuals.clone();
@@ -163,6 +170,7 @@ where
         combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
         selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
     ) {
+
         let end = self.size / offspring;
         let mut new_inds: Vec<Individual<T>>;
         for _ in 0..end {
