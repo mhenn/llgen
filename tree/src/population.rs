@@ -7,7 +7,10 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 use crate::{
     constraints::get_nodes,
     init::{get_test_tree, get_test_tree_with},
-    nodes::{get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id, Node, Nodes, set_subtree_by_node_id},
+    nodes::{
+        get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id,
+        set_subtree_by_node_id, Node, Nodes,
+    },
     settings::Settings,
 };
 
@@ -71,7 +74,7 @@ where
     let end = get_shortest_tree_len(&first, &second);
     let id = thread_rng().gen_range(0..end);
 
-    if let (Some(res_node1), Some(res_node2)) = get_nodes_from_trees(&first, &second, id){
+    if let (Some(res_node1), Some(res_node2)) = get_nodes_from_trees(&first, &second, id) {
         let cut_subtree = set_subtree_by_node_id(&mut first, &res_node2, id);
         set_subtree_by_node_id(&mut second, &res_node1, id);
     }
@@ -85,13 +88,13 @@ pub fn tree_crossover<T>(
     offspring: usize,
 ) -> Vec<Individual<T>>
 where
-    T: Default + Clone + PartialEq +Debug
+    T: Default + Clone + PartialEq + Debug,
 {
     let mut ret: Vec<Individual<T>> = vec![];
     //for _ in (0..offspring).step_by(2) {
-        let (first, second) = subtree_crossover(first.chromosome, second.chromosome);
-        ret.push(Individual::new(first));
-        ret.push(Individual::new(second));
+    let (first, second) = subtree_crossover(first.chromosome, second.chromosome);
+    ret.push(Individual::new(first));
+    ret.push(Individual::new(second));
     //}
     ret
 }
@@ -102,7 +105,10 @@ where
 {
     println!("len: {:?}", individuals.len());
     let i1 = individuals
-        .choose_weighted(&mut thread_rng(), |item| {println!("{:?}", item.fitness); item.fitness_percentage})
+        .choose_weighted(&mut thread_rng(), |item| {
+            println!("{:?}", item.fitness);
+            item.fitness_percentage
+        })
         .unwrap()
         .clone();
     let i2 = individuals
@@ -151,17 +157,24 @@ where
             .sort_by(|a, b| b.fitness.total_cmp(&a.fitness));
     }
 
-    pub fn select_elites(&mut self, percentage: f64) -> Vec<Individual<T>>{
-        self.sort_by_fitness();
+    pub fn select_elites(&mut self, percentage: f64) -> Vec<Individual<T>> {
         let inds = self.individuals.clone();
-        inds.into_iter().take((self.size as f64 * percentage) as usize).collect()
+        inds.into_iter()
+            .take((self.size as f64 * percentage) as usize)
+            .collect()
     }
 
-
-    pub fn set_fitness_percentages(&mut self){
-        let max: f64 =  self.individuals.iter().fold(0.0 ,|acc, f| acc + f.fitness ) /self.individuals.len() as f64;
+    pub fn set_fitness_percentages(&mut self) {
+        let max: f64 = self.individuals.iter().fold(0.0, |acc, f| acc + f.fitness)
+            / self.individuals.len() as f64;
         let inds = self.individuals.clone();
-        self.individuals  = inds.into_iter().map(|mut f|{ f.fitness_percentage = (f.fitness  / max)   ; f }).collect();
+        self.individuals = inds
+            .into_iter()
+            .map(|mut f| {
+                f.fitness_percentage = (f.fitness / max);
+                f
+            })
+            .collect();
     }
 
     pub fn crossover(
@@ -169,14 +182,31 @@ where
         offspring: usize,
         combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
         selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
-    ) {
-
+    ) -> Vec<Individual<T>> {
         let end = self.size / offspring;
-        let mut new_inds: Vec<Individual<T>>;
+        let mut new_inds: Vec<Individual<T>> =  vec![];
         for _ in 0..end {
             let parents = selection(&self.individuals);
             new_inds = combine(parents.first, parents.second, offspring);
         }
+        new_inds
+    }
+
+    pub fn handle_generation_update(
+        &mut self,
+        offspring: usize,
+        combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
+        selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
+        elite_percentage: f64,
+    ) {
+        self.sort_by_fitness();
+        let mut elites = self.select_elites(elite_percentage);
+        let mut next_gen = self.crossover(offspring, combine, selection);
+        let split_at = (self.size - (self.size as f64 * elite_percentage) as usize);
+        next_gen.split_off(split_at);
+        next_gen.append(&mut elites);
+        // maybe a new generation should be returned instead
+        self.individuals = next_gen;
     }
 }
 
@@ -215,7 +245,7 @@ fn gen_tree_tree_crossover() {
     print!("{:?}", expr1);
     println!();
     println!("{:?}", expr2);
-    let (expr1, expr2) = subtree_crossover(expr1, expr2, );
+    let (expr1, expr2) = subtree_crossover(expr1, expr2);
     println!();
 
     println!("{:?}", expr1);

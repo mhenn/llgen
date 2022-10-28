@@ -65,7 +65,7 @@ where
         bfs_rec(&mut q);
     }
 
-    pub fn set_subtree(&mut self, node: &Node<T>){
+    pub fn set_subtree(&mut self, node: &Node<T>) {
         self.value = node.value.clone();
         self.children = node.children.clone();
     }
@@ -106,15 +106,18 @@ where
     root.clone()
 }
 
-pub fn set_subtree_by_node_id<T>(root: &mut Node<T>, node_to_set: &Node<T>, id: usize) -> Option<Node<T>>
+pub fn set_subtree_by_node_id<T>(
+    root: &mut Node<T>,
+    node_to_set: &Node<T>,
+    id: usize,
+) -> Option<Node<T>>
 where
     T: Debug + Clone + Default + PartialEq,
 {
-
-    if root.id == id{
+    if root.id == id {
         let ret = root.clone();
         root.set_subtree(node_to_set);
-        return Some(ret)
+        return Some(ret);
     }
 
     let mut que: VecDeque<&mut Node<T>> = VecDeque::new();
@@ -125,7 +128,7 @@ where
             if child.id == id {
                 let ret = child.clone();
                 child.set_subtree(node_to_set);
-                return Some(ret)
+                return Some(ret);
             }
             que.push_front(child);
         }
