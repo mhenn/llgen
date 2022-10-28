@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use rand::Rng;
 
 use crate::{
@@ -19,7 +21,7 @@ pub fn evolution_cycle<T>(
     combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
     selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
 ) where
-    T: Copy + Clone + Default,
+    T: Copy + Clone + Default + Debug,
 {
     //Todo: settings & get_nodes
     let settings = Settings::new().unwrap();
@@ -27,14 +29,13 @@ pub fn evolution_cycle<T>(
     pop.populate(nodes, &settings, init);
     evaluate(&mut pop.individuals);
     pop.set_fitness_percentages();
-    pop.handle_generation_update(2, combine, selection, elite_percentage)
+    pop.handle_generation_update(2, combine, selection, elite_percentage);
     //    pop.mutate(mutation);
 }
 
 pub fn evaluate<T>(inds: &mut Vec<Individual<T>>) {
     for chromosome in inds.iter_mut() {
         chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
-        println!("R: {:?}", chromosome.fitness);
     }
 }
 pub fn crop<T>(pop_fitness: f64, ind: &Individual<T>) -> bool {
@@ -48,16 +49,22 @@ fn ramped_hh() {
     let _ret = ramped_half_half(size, &nodes, &config);
 }
 
+use std::time::{Duration, Instant};
+
 #[test]
 fn evolve() {
     let nodes = get_nodes();
+        let start = Instant::now();
     evolution_cycle(
         ramped_half_half,
         &nodes,
-        10,
+        1000,
         0.25,
         evaluate,
         tree_crossover,
         roulette_wheel,
     );
+    let duration = start.elapsed();
+
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
 }

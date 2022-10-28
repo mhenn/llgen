@@ -187,7 +187,7 @@ where
         let mut new_inds: Vec<Individual<T>> =  vec![];
         for _ in 0..end {
             let parents = selection(&self.individuals);
-            new_inds = combine(parents.first, parents.second, offspring);
+            new_inds.append(&mut combine(parents.first, parents.second, offspring));
         }
         new_inds
     }
@@ -203,6 +203,7 @@ where
         let mut elites = self.select_elites(elite_percentage);
         let mut next_gen = self.crossover(offspring, combine, selection);
         let split_at = (self.size - (self.size as f64 * elite_percentage) as usize);
+        println!("{:?}", split_at);
         next_gen.split_off(split_at);
         next_gen.append(&mut elites);
         // maybe a new generation should be returned instead
@@ -215,7 +216,7 @@ pub struct IndividualTuple<T> {
     pub second: Individual<T>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Individual<T> {
     pub chromosome: Node<T>,
     pub fitness: f64,
