@@ -1,4 +1,5 @@
 #include "behaviortree_cpp/bt_factory.h"
+#include "./nodes/test.cpp"
 
 using namespace BT;
 
@@ -6,7 +7,7 @@ static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
         <Sequence name="root_sequence">
-            <CloseGripper   name="close_gripper"/>
+            <Test   name="Test"/>
         </Sequence>
      </BehaviorTree>
  </root>
@@ -15,6 +16,8 @@ static const char* xml_text = R"(
 int main()
 {
   BehaviorTreeFactory factory;
+
+  factory.registerNodeType<Test>("Test");
 
   auto tree = factory.createTreeFromText(xml_text);
 
