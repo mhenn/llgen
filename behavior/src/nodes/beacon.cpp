@@ -2,17 +2,17 @@
 // without ports.
 #include "behaviortree_cpp/behavior_tree.h"
 
-class Test : public BT::SyncActionNode
+class BeaconSignal : public BT::SyncActionNode
 {
 public:
-  Test(const std::string& name) :
+  BeaconSignal(const std::string& name) :
       BT::SyncActionNode(name, {})
   {}
 
   // You must override the virtual function tick()
   BT::NodeStatus tick() override
   {
-    std::cout << "Test: " << this->name() << std::endl;
+    std::cout << "BeaconSignal: " << this->name() << std::endl;
     return BT::NodeStatus::SUCCESS;
   }
 };

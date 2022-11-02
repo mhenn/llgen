@@ -1,5 +1,6 @@
 #include "behaviortree_cpp/bt_factory.h"
-#include "./nodes/test.cpp"
+#include "./nodes/beacon.cpp"
+#include "./nodes/gripper.cpp"
 
 using namespace BT;
 
@@ -15,13 +16,16 @@ static const char* xml_text = R"(
 
 int main()
 {
-  BehaviorTreeFactory factory;
+    static GripperInterface gripper;
+    BehaviorTreeFactory factory;
 
-  factory.registerNodeType<Test>("Test");
 
-  auto tree = factory.createTreeFromText(xml_text);
+    factory.registerNodeType<BeaconSignal>("Beacon");
+    factory.registerSimpleAction("Pickup", std::bind(&GripperInterface::pickup, &gripper));
+    factory.registerSimpleAction("PutDown", std::bind(&GripperInterface::put_down, &gripper));
+    auto tree = factory.createTreeFromText(xml_text);
 
-  tree.tickWhileRunning();
+    tree.tickWhileRunning();
 
-  return 0;
+    return 0;
 }
