@@ -8,7 +8,7 @@ static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
         <Sequence name="root_sequence">
-            <Test   name="Test"/>
+            <BeaconSignal   name="Bacon"/>
         </Sequence>
      </BehaviorTree>
  </root>
@@ -20,7 +20,7 @@ int main()
     BehaviorTreeFactory factory;
 
 
-    factory.registerNodeType<BeaconSignal>("Beacon");
+    factory.registerNodeType<BeaconSignal>("BeaconSignal");
     factory.registerSimpleAction("Pickup", std::bind(&GripperInterface::pickup, &gripper));
     factory.registerSimpleAction("PutDown", std::bind(&GripperInterface::put_down, &gripper));
     auto tree = factory.createTreeFromText(xml_text);

@@ -1,21 +1,10 @@
+#include "./gripper.h"
 
-#include "behaviortree_cpp/behavior_tree.h"
-#include <behaviortree_cpp/basic_types.h>
 
-using BT::NodeStatus;
+BT::NodeStatus GripperInterface::pickup(){
+    return BT::NodeStatus::SUCCESS;
+}
 
-class GripperInterface
-{
-  public:
-    GripperInterface() : _opened(true)
-    {
-    }
-
-    NodeStatus pickup();
-
-    NodeStatus put_down();
-
-  private:
-    bool _opened;
-};
-
+BT::NodeStatus GripperInterface::put_down(){
+    return BT::NodeStatus::SUCCESS;
+}
