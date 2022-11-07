@@ -2,10 +2,10 @@
 // without ports.
 #include "behaviortree_cpp/behavior_tree.h"
 
-class BeaconSignal : public BT::SyncActionNode
+class Beacon : public BT::SyncActionNode
 {
 public:
-  BeaconSignal(const std::string& name) :
+  Beacon(const std::string& name) :
       BT::SyncActionNode(name, {})
   {}
 
