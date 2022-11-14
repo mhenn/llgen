@@ -1,6 +1,4 @@
-// #include "../msgs/GameState.pb.h"
-// #include "../msgs/BeaconSignal.pb.h"
-// #include "../msgs/BeaconSignal.pb.cc"
+//#include "BeaconSignal.pb.h"
 #include "../../proto_msgs/BeaconSignal.pb.h"
 #include <protobuf_comm/peer.h>
 
@@ -27,22 +25,21 @@ void handle_timer(const boost::system::error_code &error) {
   Time *time = signal->mutable_time();
   boost::posix_time::time_duration const since_epoch =
       now - boost::posix_time::from_time_t(0);
-  //
-  //		time->set_sec(static_cast<google::protobuf::int64>(since_epoch.total_seconds()));
-  //		time->set_nsec(static_cast<google::protobuf::int64>(
-  //		  since_epoch.fractional_seconds() * (1000000000 /
-  // since_epoch.ticks_per_second())));
-  //
-  //
-  //		signal->set_number(1);
-  //		signal->set_peer_name(TEAM_NAME);
-  //		signal->set_team_name(TEAM_NAME);
-  //		signal->set_team_color(team_color_);
-  //		signal->set_seq(++seq_);
-  //		peer_team_->send(signal);
-  //
-  //		timer_->expires_at(timer_->expires_at() +
-  // boost::posix_time::milliseconds(2000));
-  // timer_->async_wait(handle_timer);
-  //	}
+
+  		time->set_sec(static_cast<google::protobuf::int64>(since_epoch.total_seconds()));
+  		time->set_nsec(static_cast<google::protobuf::int64>(
+  		  since_epoch.fractional_seconds() * (1000000000 /
+   since_epoch.ticks_per_second())));
+
+
+  		signal->set_number(1);
+  		signal->set_peer_name(TEAM_NAME);
+  		signal->set_team_name(TEAM_NAME);
+  		signal->set_team_color(team_color_);
+  		signal->set_seq(++seq_);
+  		peer_team_->send(signal);
+
+  		timer_->expires_at(timer_->expires_at() +
+   boost::posix_time::milliseconds(2000));
+   timer_->async_wait(handle_timer);
 }

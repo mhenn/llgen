@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project(BTRCLL)
 
 include_directories(./src)
+include_directories(./proto_msgs/)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

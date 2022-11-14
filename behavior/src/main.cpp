@@ -8,9 +8,9 @@ using namespace BT;
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
-        <Sequence name="root_sequence">
-            <Beacon   name="Bacon"/>
-        </Sequence>
+            <Repeat >
+                <Beacon   name="Bacon"/>
+            </Repeat>
      </BehaviorTree>
  </root>
  )";
@@ -19,7 +19,6 @@ int main()
 {
     static GripperInterface gripper;
     BehaviorTreeFactory factory;
-
 
     factory.registerNodeType<Beacon>("Beacon");
     factory.registerSimpleAction("Pickup", std::bind(&GripperInterface::pickup, &gripper));
