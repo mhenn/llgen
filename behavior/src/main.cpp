@@ -1,19 +1,19 @@
 #include "behaviortree_cpp/bt_factory.h"
 #include "./nodes/beacon.cpp"
 #include "./nodes/gripper.cpp"
-#include "./proto/peer.cpp"
 
 using namespace BT;
 
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
-            <Repeat >
-                <Beacon   name="Bacon"/>
+            <Repeat num_cycles="4">
+                <Beacon name="Bacon"/>
             </Repeat>
      </BehaviorTree>
  </root>
  )";
+
 
 int main()
 {
@@ -26,6 +26,12 @@ int main()
     auto tree = factory.createTreeFromText(xml_text);
 
     tree.tickWhileRunning();
+
+	delete peer_team_;
+	delete peer_public_;
+
+	// Delete all global objects allocated by libprotobuf
+	google::protobuf::ShutdownProtobufLibrary();
 
     return 0;
 }

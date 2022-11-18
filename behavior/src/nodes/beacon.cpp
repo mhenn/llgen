@@ -1,6 +1,8 @@
 // Example of custom SyncActionNode (synchronous action)
 // without ports.
 #include "behaviortree_cpp/behavior_tree.h"
+#include "../proto/peer.cpp"
+
 
 class Beacon : public BT::SyncActionNode
 {
@@ -12,7 +14,9 @@ public:
   // You must override the virtual function tick()
   BT::NodeStatus tick() override
   {
-    std::cout << "BeaconSignal: " << this->name() << std::endl;
+    handle_beacon();
+
+
     return BT::NodeStatus::SUCCESS;
   }
 };
