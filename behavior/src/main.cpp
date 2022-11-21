@@ -7,7 +7,7 @@ using namespace BT;
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
-            <Repeat num_cycles="4">
+            <Repeat num_cycles="-1">
                 <Beacon name="Bacon"/>
             </Repeat>
      </BehaviorTree>

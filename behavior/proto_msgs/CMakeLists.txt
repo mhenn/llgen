@@ -9,8 +9,6 @@ project(msgs)
 #TARGET_LINK_LIBRARIES(proto_msgs ${PROTOBUF_LIBRARIES})
 #
 
-
-
 find_package(Protobuf REQUIRED)
 
 list(APPEND protos
@@ -18,11 +16,10 @@ list(APPEND protos
     Team.proto
     Pose2D.proto
     BeaconSignal.proto
-
+    GameInfo.proto
+    GameState.proto
 )
 
-add_library(msgs    )
-protobuf_generate(TARGET ${PROJECT_NAME} PROTOS Time.proto Pose2D.proto Team.proto BeaconSignal.proto)
-target_link_libraries(${PROJECT_NAME} protobuf   )
-
-
+add_library(msgs)
+protobuf_generate(TARGET ${PROJECT_NAME} PROTOS Time.proto Pose2D.proto Team.proto BeaconSignal.proto  GameState.proto MachineCommands.proto MachineInfo.proto ProductColor.proto Zone.proto MachineInstructions.proto MachineDescription.proto )
+target_link_libraries(${PROJECT_NAME} protobuf)

@@ -11,3 +11,10 @@ CTestTestfile.cmake
 _deps
 BTRCLL
 src/msgs/
+build
+build/*
+proto_msgs/*.pb.h
+proto_msgs/*.pb.cc
+proto_msgs/.cmake
+.cmake
+*.a

@@ -2,6 +2,8 @@
 #define HEADER_INCLUDED_
 //#include "BeaconSignal.pb.h"
 #include "../../proto_msgs/BeaconSignal.pb.h"
+#include "../../proto_msgs/GameState.pb.h"
+#include "../../proto_msgs/MachineCommands.pb.h"
 #include <protobuf_comm/peer.h>
 
 using namespace protobuf_comm;
@@ -75,6 +77,7 @@ void setup_proto(){
     peer_public_ = new ProtobufBroadcastPeer("172.18.0.22", 4445, 4444);
     MessageRegister &message_register = peer_public_->message_register();
 	message_register.add_message_type<BeaconSignal>();
+    message_register.add_message_type<GameState>();
 
     peer_team_ = new ProtobufBroadcastPeer("172.18.0.22", 4446,4441);
 
