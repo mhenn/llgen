@@ -32,8 +32,6 @@ void handle_beacon() {
       since_epoch.fractional_seconds() * (1000000000 /
        since_epoch.ticks_per_second())));
 
-    std::cout << "Bruh: "  << std::endl;
-
   		signal->set_number(1);
   		signal->set_peer_name(TEAM_NAME);
   		signal->set_team_name(TEAM_NAME);
@@ -74,12 +72,11 @@ handle_message(boost::asio::ip::udp::endpoint            &sender,
 
 void setup_proto(){
 
-    peer_public_ = new ProtobufBroadcastPeer("localhost", 4445,4444);
-
+    peer_public_ = new ProtobufBroadcastPeer("172.18.0.22", 4445, 4444);
     MessageRegister &message_register = peer_public_->message_register();
 	message_register.add_message_type<BeaconSignal>();
 
-    peer_team_ = new ProtobufBroadcastPeer("localhost", 4446,4441);
+    peer_team_ = new ProtobufBroadcastPeer("172.18.0.22", 4446,4441);
 
     peer_public_->signal_received().connect(handle_message);
 	peer_public_->signal_recv_error().connect(handle_recv_error);

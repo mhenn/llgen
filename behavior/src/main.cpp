@@ -25,6 +25,8 @@ int main()
     factory.registerSimpleAction("PutDown", std::bind(&GripperInterface::put_down, &gripper));
     auto tree = factory.createTreeFromText(xml_text);
 
+    setup_proto();
+
     tree.tickWhileRunning();
 
 	delete peer_team_;
