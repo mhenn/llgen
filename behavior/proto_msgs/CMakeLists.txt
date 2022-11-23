@@ -21,5 +21,8 @@ list(APPEND protos
 )
 
 add_library(msgs)
-protobuf_generate(TARGET ${PROJECT_NAME} PROTOS Time.proto Pose2D.proto Team.proto BeaconSignal.proto  GameState.proto MachineCommands.proto MachineInfo.proto ProductColor.proto Zone.proto MachineInstructions.proto MachineDescription.proto )
+protobuf_generate(TARGET ${PROJECT_NAME} PROTOS Time.proto Pose2D.proto
+                    Team.proto BeaconSignal.proto  GameState.proto MachineCommands.proto
+                    MachineInfo.proto ProductColor.proto Zone.proto MachineInstructions.proto
+                    MachineDescription.proto RobotInfo.proto VersionInfo.proto GameInfo.proto)
 target_link_libraries(${PROJECT_NAME} protobuf)

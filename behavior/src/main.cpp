@@ -1,6 +1,7 @@
 #include "behaviortree_cpp/bt_factory.h"
 #include "./nodes/beacon.cpp"
 #include "./nodes/gripper.cpp"
+#include "./proto/client.cpp"
 
 using namespace BT;
 
@@ -26,6 +27,8 @@ int main()
     auto tree = factory.createTreeFromText(xml_text);
 
     setup_proto();
+    setup_client();
+
 
     tree.tickWhileRunning();
 
