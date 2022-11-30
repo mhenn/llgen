@@ -108,7 +108,6 @@ handle_message(boost::asio::ip::udp::endpoint            &sender,
 	}
 }
 
-void set_game_phase(){}
 
 void setup_proto(){
 

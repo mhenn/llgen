@@ -3,7 +3,9 @@
 #include "../../proto_msgs/GameInfo.pb.h"
 #include "../../proto_msgs/RobotInfo.pb.h"
 #include "../../proto_msgs/VersionInfo.pb.h"
+#include <string.h>
 
+#include <unistd.h>
 
 using namespace llsf_msgs;
 using namespace protobuf_comm;
@@ -35,23 +37,22 @@ send_team(){
 }
 
 void
-send_setup(){
+send_game_state(std::string state, std::string phase){
 
         GameState::Phase p;
-		GameState::Phase_Parse("SETUP", &p);
+		GameState::Phase_Parse(state, &p);
 
         GameState::State s;
-		GameState::State_Parse("RUNNING", &s);
+		GameState::State_Parse(phase, &s);
 
         msg_phase_ = new llsf_msgs::SetGamePhase();
 		msg_phase_->set_phase(p);
         msg_state_ = new llsf_msgs::SetGameState();
-		msg_state_->set_state(s );
-				printf("Sending Phase: GameState_Phase_Name(10)).c_str()");
-				client_->send(*msg_phase_);
-				printf("Sending State: %s\n", GameState_State_Name(2).c_str());
+		msg_state_->set_state(s);
+                std::cout << "PHASE: " << state << std::endl;
 				client_->send(*msg_state_);
-
+                std::cout << "STATE: " << phase << std::endl;
+				client_->send(*msg_phase_);
 }
 
 
@@ -62,10 +63,20 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
         if ((v = std::dynamic_pointer_cast<VersionInfo>(msg))) {
 
 			// connected, send what we came for
+                std::cout << "aye: "  << std::endl;
+
             send_team();
-            send_setup();
-			quit();
+            send_game_state("SETUP", "RUNNING");
+
 	}
+
+    std::shared_ptr<GameState> gs;
+	if ((gs = std::dynamic_pointer_cast<GameState>(msg))) {
+usleep(1000000);
+                std::cout << "boi: "  << std::endl;
+            send_game_state("PRODUCTION", "RUNNING");
+            quit();
+    }
 }
 
 
