@@ -58,22 +58,17 @@ send_game_state(std::string state, std::string phase){
 
 void
 client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
-	{
+{
 	std::shared_ptr<VersionInfo> v;
         if ((v = std::dynamic_pointer_cast<VersionInfo>(msg))) {
-
 			// connected, send what we came for
-                std::cout << "aye: "  << std::endl;
-
             send_team();
             send_game_state("SETUP", "RUNNING");
-
 	}
 
     std::shared_ptr<GameState> gs;
 	if ((gs = std::dynamic_pointer_cast<GameState>(msg))) {
-usleep(1000000);
-                std::cout << "boi: "  << std::endl;
+            usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
             quit();
     }
