@@ -24,5 +24,6 @@ add_library(msgs)
 protobuf_generate(TARGET ${PROJECT_NAME} PROTOS Time.proto Pose2D.proto
                     Team.proto BeaconSignal.proto  GameState.proto MachineCommands.proto
                     MachineInfo.proto ProductColor.proto Zone.proto MachineInstructions.proto
-                    MachineDescription.proto RobotInfo.proto VersionInfo.proto GameInfo.proto)
+                    MachineDescription.proto RobotInfo.proto VersionInfo.proto GameInfo.proto
+                    OrderInfo.proto ExplorationInfo.proto MachineReport.proto RingInfo.proto)
 target_link_libraries(${PROJECT_NAME} protobuf)

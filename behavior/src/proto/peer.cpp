@@ -2,9 +2,18 @@
 #define HEADER_INCLUDED_
 //#include "BeaconSignal.pb.h"
 #include "../../proto_msgs/BeaconSignal.pb.h"
+#include "../../proto_msgs/MachineInfo.pb.h"
+#include "../../proto_msgs/OrderInfo.pb.h"
 #include "../../proto_msgs/GameState.pb.h"
 #include "../../proto_msgs/MachineCommands.pb.h"
+#include "../../proto_msgs/ExplorationInfo.pb.h"
+#include "../../proto_msgs/MachineReport.pb.h"
+#include "../../proto_msgs/RingInfo.pb.h"
+#include "../../proto_msgs/RobotInfo.pb.h"
+#include "../../proto_msgs/VersionInfo.pb.h"
 #include <protobuf_comm/peer.h>
+
+#include <string.h>
 
 using namespace protobuf_comm;
 using namespace boost::placeholders;
@@ -62,14 +71,15 @@ handle_message(boost::asio::ip::udp::endpoint            &sender,
                uint16_t                                   msg_type,
                std::shared_ptr<google::protobuf::Message> msg)
 {
-    	std::shared_ptr<BeaconSignal> b;
-    if ((b = std::dynamic_pointer_cast<BeaconSignal>(msg))) {
-	std::shared_ptr<BeaconSignal> b;
-		       b->number(),
-		       b->team_name().c_str(),
-		       b->peer_name().c_str(),
-		       b->seq();
-    }
+    std::shared_ptr<MachineInfo> mi;
+	if ((mi = std::dynamic_pointer_cast<MachineInfo>(msg))) {
+		printf("MachineInfo received:\n");
+		for (int i = 0; i < mi->machines_size(); ++i) {
+			const Machine &m = mi->machines(i);
+			printf("  %s, state: %s\n", m.name().c_str(), m.state().c_str());
+		}
+	}
+
     std::shared_ptr<GameState> gs;
 	if ((gs = std::dynamic_pointer_cast<GameState>(msg))) {
 		int hour = gs->game_time().sec() / 3600;
@@ -102,12 +112,25 @@ void set_game_phase(){}
 
 void setup_proto(){
 
-    peer_public_ = new ProtobufBroadcastPeer("172.18.0.22", 4445, 4444);
+//    string host = "172.18.0.22";
+    std::string host = "localhost";
+    peer_public_ = new ProtobufBroadcastPeer(host, 4445, 4444);
     MessageRegister &message_register = peer_public_->message_register();
-	message_register.add_message_type<BeaconSignal>();
-    message_register.add_message_type<GameState>();
+    message_register.add_message_type<BeaconSignal>();
+	message_register.add_message_type<OrderInfo>();
+	message_register.add_message_type<GameState>();
+	message_register.add_message_type<VersionInfo>();
+	message_register.add_message_type<ExplorationInfo>();
+	message_register.add_message_type<MachineInfo>();
+	message_register.add_message_type<MachineReportInfo>();
+	message_register.add_message_type<RobotInfo>();
+	message_register.add_message_type<RingInfo>();
 
-    peer_team_ = new ProtobufBroadcastPeer("172.18.0.22", 4446,4441);
+    peer_team_ = new ProtobufBroadcastPeer(host, 4446,4441, &message_register);
+
+    peer_team_->signal_received().connect(handle_message);
+	peer_team_->signal_recv_error().connect(handle_recv_error);
+	peer_team_->signal_send_error().connect(handle_send_error);
 
     peer_public_->signal_received().connect(handle_message);
 	peer_public_->signal_recv_error().connect(handle_recv_error);

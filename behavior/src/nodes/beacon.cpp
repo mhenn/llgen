@@ -7,15 +7,15 @@
 class Beacon : public BT::SyncActionNode
 {
 public:
+  int count = 0;
+
   Beacon(const std::string& name) :
       BT::SyncActionNode(name, {})
   {}
 
-  // You must override the virtual function tick()
   BT::NodeStatus tick() override
   {
     handle_beacon();
-
 
     return BT::NodeStatus::SUCCESS;
   }
