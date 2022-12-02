@@ -50,6 +50,14 @@ void handle_beacon() {
   		peer_team_->send(signal);
 }
 
+void send_machine_state(std::string name, MachineState state ){
+    printf("Sending State\n");
+	SetMachineState set_state;
+	set_state.set_machine_name(name);
+	set_state.set_state(state);
+	peer_team_->send(set_state);
+}
+
 void
 handle_recv_error(boost::asio::ip::udp::endpoint &endpoint, std::string msg)
 {

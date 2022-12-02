@@ -15,6 +15,7 @@ static boost::asio::io_service io_service_;
 SetTeamName  *msg_team_cyan_ = NULL;
 SetGamePhase *msg_phase_ = NULL;
 SetGameState *msg_state_ = NULL;
+bool switched = false;
 
 
 void
@@ -22,7 +23,7 @@ quit(int exitcode = 0, const char *errmsg = NULL)
 {
 	if (errmsg)
 		fprintf(stderr, "%s\n", errmsg);
-//	io_service_.stop();
+	io_service_.stop();
 }
 
 
@@ -67,10 +68,10 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
 	}
 
     std::shared_ptr<GameState> gs;
-	if ((gs = std::dynamic_pointer_cast<GameState>(msg))) {
+	if ((gs = std::dynamic_pointer_cast<GameState>(msg)) && !switched) {
             usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
-            quit();
+            switched = true;
     }
 }
 
