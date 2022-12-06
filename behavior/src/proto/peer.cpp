@@ -114,6 +114,48 @@ handle_message(boost::asio::ip::udp::endpoint            &sender,
 			}
 		}
 	}
+
+    static inline std::string
+  str_join(const std::vector<std::string> &v, char delim = '/')
+     {
+         std::string rv;
+         for (size_t i = 0; i < v.size(); ++i) {
+             if (i > 0)
+                 rv += delim;
+             rv += v[i];
+         }
+         return rv;
+     }
+
+
+
+    std::shared_ptr<OrderInfo> oi;
+	if ((oi = std::dynamic_pointer_cast<OrderInfo>(msg))) {
+ printf("Order Info received:\n");
+           for (int i = 0; i < oi->orders_size(); ++i) {
+               const llsf_msgs::Order &o         = oi->orders(i);
+               unsigned int            begin_min = o.delivery_period_begin() / 60;
+               unsigned int            begin_sec = o.delivery_period_begin() - begin_min * 60;
+               unsigned int            end_min   = o.delivery_period_end() / 60;
+               unsigned int            end_sec   = o.delivery_period_end() - end_min * 60;
+
+               std::list<std::string> rings;
+               std::string lel = "";
+               for (int j = 0; j < o.ring_colors_size(); ++j)
+                   rings.push_back(llsf_msgs::RingColor_Name(o.ring_colors(j)));
+
+
+               printf("  %u (%s): %u%u/%u of %s||%s at gate %u \n",
+                      o.id(),
+                      llsf_msgs::Order::Complexity_Name(o.complexity()).c_str(),
+                      o.quantity_delivered_cyan(),
+                      o.quantity_delivered_magenta(),
+                      o.quantity_requested(),
+                      llsf_msgs::BaseColor_Name(o.base_color()).c_str(),
+                      llsf_msgs::CapColor_Name(o.cap_color()).c_str(),
+                      o.delivery_gate());
+           }
+    }
 }
 
 
