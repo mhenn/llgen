@@ -20,7 +20,7 @@ using namespace protobuf_comm;
 using namespace boost::placeholders;
 using namespace llsf_msgs;
 
-#define TEAM_NAME "Evolution"
+#define TEAM_NAME "Carologistics"
 #define CRYPTO_KEY "key"
 #define CRYPTO_CIPHER "aes-128-cbc"
 
@@ -51,6 +51,59 @@ void handle_beacon() {
   signal->set_seq(++seq_);
   peer_team_->send(signal);
 }
+
+
+//#prepare cap
+//./rcll-prepare-machine Carologistics C-CS1 RETRIEVE_CAP & sleep 10 ; kill $!
+//
+//#get base
+//./rcll-prepare-machine Carologistics C-BS INPUT BASE_BLACK & sleep 10 ; kill $!
+//
+//#mount cap
+//./rcll-prepare-machine Carologistics C-CS1 MOUNT_CAP & sleep 10 ; kill $!
+//
+//#deliver
+//./rcll-prepare-machine Carologistics C-DS 3 & sleep 10 ; kill $!
+
+
+//void send_prepare_machine(std::string machine_name, std::string machine_type,
+//         std::string side, std::string base, std::string operation){
+void send_prepare_machine(){
+        CSOp op;
+        MachineSide bs_side;
+        BaseColor bs_color;
+
+        std::string machine_name = "C-BS";
+        std::string machine_type = "BS";
+        std::string side = "INPUT";
+        std::string base = "BASE_RED";
+
+        //llsf_msgs::CSOp_Parse(operation, op);
+        llsf_msgs::MachineSide_Parse(side, &bs_side);
+		llsf_msgs::BaseColor_Parse(base,&bs_color);
+
+    printf("Announcing machine type\n");
+			llsf_msgs::PrepareMachine prep;
+			prep.set_team_color(team_color_);
+			prep.set_machine(machine_name);
+			auto duration = std::chrono::system_clock::now().time_since_epoch();
+			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+			prep.set_sent_at(millis);
+			if (machine_type == "BS") {
+				llsf_msgs::PrepareInstructionBS *prep_bs = prep.mutable_instruction_bs();
+				prep_bs->set_side(bs_side);
+				prep_bs->set_color(bs_color);
+				printf("Set BS side %s  color %s\n",
+				      MachineSide_Name(bs_side).c_str(),
+				      BaseColor_Name(bs_color).c_str());
+            }
+            else if (machine_type == "CS") {
+                            PrepareInstructionCS *prep_cs = prep.mutable_instruction_cs();
+                            prep_cs->set_operation(op);
+            }
+            peer_team_->send(prep);
+}
+
 
 void send_machine_state(std::string name, MachineState state) {
   printf("Sending State\n");
@@ -181,6 +234,7 @@ void setup_proto() {
   peer_public_->signal_received().connect(handle_message);
   peer_public_->signal_recv_error().connect(handle_recv_error);
   peer_public_->signal_send_error().connect(handle_send_error);
+
 }
 
 #endif

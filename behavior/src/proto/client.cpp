@@ -6,6 +6,8 @@
 #include "../../proto_msgs/MachineCommands.pb.h"
 #include <string.h>
 
+#include "./peer.cpp"
+
 #include <unistd.h>
 
 using namespace llsf_msgs;
@@ -31,7 +33,7 @@ quit(int exitcode = 0, const char *errmsg = NULL)
 void
 send_team(){
     msg_team_cyan_ = new SetTeamName();
-    msg_team_cyan_->set_team_name("Evo");
+    msg_team_cyan_->set_team_name("Carologistics");
     msg_team_cyan_->set_team_color(CYAN);
 
   printf("Sending cyan team: %s\n", msg_team_cyan_->team_name().c_str());
@@ -96,9 +98,9 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
             usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
-            usleep(1000000);
-            send_add_base();
     }
+    if (switched )
+            send_prepare_machine();
 
 
 }
