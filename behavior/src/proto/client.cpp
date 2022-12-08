@@ -3,6 +3,7 @@
 #include "../../proto_msgs/GameInfo.pb.h"
 #include "../../proto_msgs/RobotInfo.pb.h"
 #include "../../proto_msgs/VersionInfo.pb.h"
+#include "../../proto_msgs/MachineCommands.pb.h"
 #include <string.h>
 
 #include <unistd.h>
@@ -35,6 +36,29 @@ send_team(){
 
   printf("Sending cyan team: %s\n", msg_team_cyan_->team_name().c_str());
             client_->send(*msg_team_cyan_);
+}
+
+
+void
+send_add_base(){
+    printf("Adding base\n");
+	MachineAddBase add_base;
+	add_base.set_machine_name("C-BS");
+	client_->send(add_base);
+
+}
+
+void pick_base(){
+
+}
+
+void place_base(){
+}
+
+void pick_product(){
+}
+
+void deliver_product(){
 }
 
 void
@@ -72,7 +96,11 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
             usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
+            usleep(1000000);
+            send_add_base();
     }
+
+
 }
 
 
