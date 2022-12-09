@@ -12,6 +12,7 @@
 #include "../../proto_msgs/RingInfo.pb.h"
 #include "../../proto_msgs/RobotInfo.pb.h"
 #include "../../proto_msgs/VersionInfo.pb.h"
+#include <csignal>
 #include <protobuf_comm/peer.h>
 #include "../utils/order.cpp"
 
@@ -20,8 +21,9 @@ using namespace protobuf_comm;
 using namespace boost::placeholders;
 using namespace llsf_msgs;
 
+#define NAME  "bot-1"
 #define TEAM_NAME "Carologistics"
-#define CRYPTO_KEY "key"
+#define CRYPTO_KEY "randomkey"
 #define CRYPTO_CIPHER "aes-128-cbc"
 
 ProtobufBroadcastPeer *peer_public_ = NULL;
@@ -29,8 +31,9 @@ ProtobufBroadcastPeer *peer_team_ = NULL;
 Team team_color_ = CYAN;
 unsigned long seq_ = 0;
 
-void handle_beacon() {
 
+void handle_beacon() {
+    usleep(1000);
   boost::posix_time::ptime now(
       boost::posix_time::microsec_clock::universal_time());
   std::shared_ptr<BeaconSignal> signal(new BeaconSignal());
@@ -44,31 +47,115 @@ void handle_beacon() {
       since_epoch.fractional_seconds() *
       (1000000000 / since_epoch.ticks_per_second())));
 
+    Pose2D *pose = signal->mutable_pose();
+    pose->set_x(1.0);
+    pose->set_y(2.0);
+    pose->set_ori(3.0);
+
+    Time *pose_time = pose->mutable_timestamp();
+    pose_time->set_sec(4);
+    pose_time->set_nsec(5);
+
   signal->set_number(1);
-  signal->set_peer_name(TEAM_NAME);
+  signal->set_peer_name(NAME);
   signal->set_team_name(TEAM_NAME);
   signal->set_team_color(team_color_);
   signal->set_seq(++seq_);
   peer_team_->send(signal);
+
 }
 
-
+///////////TEST
 //#prepare cap
 //./rcll-prepare-machine Carologistics C-CS1 RETRIEVE_CAP & sleep 10 ; kill $!
-//
+
+void send_retrieve_cap(){
+        CSOp op;
+        MachineSide bs_side;
+        BaseColor bs_color;
+
+        std::string machine_name = "C-BS";
+        std::string machine_type = "BS";
+        std::string side = "INPUT";
+        std::string base = "BASE_RED";
+
+        //llsf_msgs::CSOp_Parse(operation, op);
+        llsf_msgs::MachineSide_Parse(side, &bs_side);
+		llsf_msgs::BaseColor_Parse(base,&bs_color);
+
+    printf("Announcing machine type\n");
+			llsf_msgs::PrepareMachine prep;
+			prep.set_team_color(team_color_);
+			prep.set_machine(machine_name);
+			auto duration = std::chrono::system_clock::now().time_since_epoch();
+			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+			prep.set_sent_at(millis);
+			if (machine_type == "BS") {
+				llsf_msgs::PrepareInstructionBS *prep_bs = prep.mutable_instruction_bs();
+				prep_bs->set_side(bs_side);
+				prep_bs->set_color(bs_color);
+				printf("Set BS side %s  color %s\n",
+				      MachineSide_Name(bs_side).c_str(),
+				      BaseColor_Name(bs_color).c_str());
+            }
+            peer_team_->send(prep);
+}
 //#get base
 //./rcll-prepare-machine Carologistics C-BS INPUT BASE_BLACK & sleep 10 ; kill $!
 //
+
+void send_mount_cap(){
+        CSOp op;
+
+        std::string machine_name = "C-CS1";
+        std::string machine_type = "CS";
+
+        llsf_msgs::CSOp_Parse("MOUNT_CAP", &op);
+
+    printf("Announcing machine type\n");
+			llsf_msgs::PrepareMachine prep;
+			prep.set_team_color(team_color_);
+			prep.set_machine(machine_name);
+			auto duration = std::chrono::system_clock::now().time_since_epoch();
+			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+			prep.set_sent_at(millis);
+            PrepareInstructionCS *prep_cs = prep.mutable_instruction_cs();
+            prep_cs->set_operation(op);
+            peer_team_->send(prep);
+}
 //#mount cap
 //./rcll-prepare-machine Carologistics C-CS1 MOUNT_CAP & sleep 10 ; kill $!
 //
 //#deliver
 //./rcll-prepare-machine Carologistics C-DS 3 & sleep 10 ; kill $!
 
+void send_deliver(){
+        CSOp op;
+        MachineSide bs_side;
+        BaseColor bs_color;
+
+        std::string machine_name = "C-DS";
+        std::string machine_type = "DS";
+
+
+    printf("Announcing machine type\n");
+			llsf_msgs::PrepareMachine prep;
+			prep.set_team_color(team_color_);
+			prep.set_machine(machine_name);
+			auto duration = std::chrono::system_clock::now().time_since_epoch();
+			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+			prep.set_sent_at(millis);
+
+            llsf_msgs::PrepareInstructionDS *prep_ds = prep.mutable_instruction_ds();
+            prep_ds->set_order_id(1);
+
+
+            peer_team_->send(prep);
+}
 
 //void send_prepare_machine(std::string machine_name, std::string machine_type,
 //         std::string side, std::string base, std::string operation){
-void send_prepare_machine(){
+void send_get_base(){
         CSOp op;
         MachineSide bs_side;
         BaseColor bs_color;
@@ -104,7 +191,7 @@ void send_prepare_machine(){
             peer_team_->send(prep);
 }
 
-
+///// TEST
 void send_machine_state(std::string name, MachineState state) {
   printf("Sending State\n");
   SetMachineState set_state;
@@ -210,11 +297,17 @@ void handle_message(boost::asio::ip::udp::endpoint &sender,
 }
 
 void setup_proto() {
-
   //    string host = "172.18.0.22";
   std::string host = "localhost";
-  peer_public_ = new ProtobufBroadcastPeer(host, 4445, 4444);
-  MessageRegister &message_register = peer_public_->message_register();
+  //peer_public_ = new ProtobufBroadcastPeer(host, 4445, 4444);
+  //peer_team_ = new ProtobufBroadcastPeer(host, 4446, 4441, CRYPTO_KEY, CRYPTO_CIPHER);
+  peer_team_ = new ProtobufBroadcastPeer(host, 4446, 4441);
+
+  peer_team_->signal_received().connect(handle_message);
+  peer_team_->signal_recv_error().connect(handle_recv_error);
+  peer_team_->signal_send_error().connect(handle_send_error);
+
+  MessageRegister &message_register = peer_team_->message_register();
   message_register.add_message_type<BeaconSignal>();
   message_register.add_message_type<OrderInfo>();
   message_register.add_message_type<GameState>();
@@ -225,15 +318,9 @@ void setup_proto() {
   message_register.add_message_type<RobotInfo>();
   message_register.add_message_type<RingInfo>();
 
-  peer_team_ = new ProtobufBroadcastPeer(host, 4446, 4441, &message_register);
-
-  peer_team_->signal_received().connect(handle_message);
-  peer_team_->signal_recv_error().connect(handle_recv_error);
-  peer_team_->signal_send_error().connect(handle_send_error);
-
-  peer_public_->signal_received().connect(handle_message);
-  peer_public_->signal_recv_error().connect(handle_recv_error);
-  peer_public_->signal_send_error().connect(handle_send_error);
+//  peer_public_->signal_received().connect(handle_message);
+//  peer_public_->signal_recv_error().connect(handle_recv_error);
+//  peer_public_->signal_send_error().connect(handle_send_error);
 
 }
 

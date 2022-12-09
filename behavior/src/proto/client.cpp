@@ -33,7 +33,7 @@ quit(int exitcode = 0, const char *errmsg = NULL)
 void
 send_team(){
     msg_team_cyan_ = new SetTeamName();
-    msg_team_cyan_->set_team_name("Carologistics");
+    msg_team_cyan_->set_team_name(TEAM_NAME);
     msg_team_cyan_->set_team_color(CYAN);
 
   printf("Sending cyan team: %s\n", msg_team_cyan_->team_name().c_str());
@@ -83,6 +83,11 @@ send_game_state(std::string state, std::string phase){
 }
 
 
+bool second = false;
+bool third = false;
+bool fourth = false;
+bool fifth = false;
+
 void
 client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
 {
@@ -98,10 +103,30 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
             usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
+            second = true;
+    } else if(second){
+        third = true;
+        second = false;
+        usleep(2000000);
+        send_retrieve_cap();
     }
-    if (switched )
-            send_prepare_machine();
-
+    else if(third){
+        fourth = true;
+        third = false;
+        usleep(2000000);
+        send_get_base();
+    }
+    else if(fourth){
+        fourth = false;
+        fifth= true;
+        usleep(2000000);
+        send_mount_cap();
+    }
+    else if(fifth){
+        fifth = false;
+        usleep(2000000);
+        send_deliver();
+    }
 
 }
 
