@@ -104,30 +104,31 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
             second = true;
-    } else if(second){
-        third = true;
-        second = false;
-        usleep(2000000);
-        send_retrieve_cap();
     }
-    else if(third){
-        fourth = true;
-        third = false;
-        usleep(2000000);
-        send_get_base();
-    }
-    else if(fourth){
-        fourth = false;
-        fifth= true;
-        usleep(2000000);
-        send_mount_cap();
-    }
-    else if(fifth){
-        fifth = false;
-        usleep(2000000);
-        send_deliver();
-    }
-
+   // else if(second){
+   //     third = true;
+   //     second = false;
+   //     usleep(2000000);
+   //     send_action("C-CS1", "CS", "RETRIEVE_CAP");
+   //     //send_action("C-BS", "BS", "", "INPUT", "BASE_RED");
+   // }
+   // else if(third){
+   //     fourth = true;
+   //     third = false;
+   //     usleep(2000000);
+   //     send_action("C-BS", "BS", "", "INPUT","BASE_RED");
+   // }
+   // else if(fourth){
+   //     fourth = false;
+   //     fifth= true;
+   //     usleep(2000000);
+   //     send_action("C-CS1", "CS", "MOUNT_CAP");
+   // }
+   // else if(fifth){
+   //     fifth = false;
+   //     usleep(2000000);
+   //     send_action("C-DS", "DS" );
+   // }
 }
 
 

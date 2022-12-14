@@ -1,6 +1,7 @@
 #include "behaviortree_cpp/bt_factory.h"
 #include "./nodes/beacon.cpp"
 #include "./nodes/gripper.cpp"
+#include "./nodes/retrieve_cap.cpp"
 #include "./proto/client.cpp"
 
 using namespace BT;
@@ -8,9 +9,11 @@ using namespace BT;
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
+         <Parallel>
             <Repeat num_cycles="-1">
                 <Beacon name="Bacon"/>
             </Repeat>
+        </Parallel>
      </BehaviorTree>
  </root>
  )";

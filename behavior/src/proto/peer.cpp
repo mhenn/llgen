@@ -67,8 +67,6 @@ void handle_beacon() {
 
 ///////////TEST
 //#prepare cap
-//./rcll-prepare-machine Carologistics C-CS1 RETRIEVE_CAP & sleep 10 ; kill $!
-
 void send_retrieve_cap(){
         CSOp op;
         MachineSide bs_side;
@@ -190,6 +188,48 @@ void send_get_base(){
             }
             peer_team_->send(prep);
 }
+
+
+void send_action(std::string name, std::string type, std::string operation = "",
+        std::string side ="", std::string base = ""){
+    CSOp op;
+    MachineSide bs_side;
+    BaseColor bs_color;
+
+
+    printf("Announcing machine type\n");
+
+    llsf_msgs::PrepareMachine prep;
+    prep.set_team_color(team_color_);
+    prep.set_machine(name);
+    auto duration = std::chrono::system_clock::now().time_since_epoch();
+    auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+    prep.set_sent_at(millis);
+
+    if(type == "DS"){
+            llsf_msgs::PrepareInstructionDS *prep_ds = prep.mutable_instruction_ds();
+            prep_ds->set_order_id(1);
+    }
+            else if (type == "BS") {
+                llsf_msgs::MachineSide_Parse(side, &bs_side);
+                llsf_msgs::BaseColor_Parse(base,&bs_color);
+				llsf_msgs::PrepareInstructionBS *prep_bs = prep.mutable_instruction_bs();
+				prep_bs->set_side(bs_side);
+				prep_bs->set_color(bs_color);
+				printf("Set BS side %s  color %s\n",
+				      MachineSide_Name(bs_side).c_str(),
+				      BaseColor_Name(bs_color).c_str());
+            }
+            else if (type == "CS") {
+                llsf_msgs::CSOp_Parse(operation, &op);
+                PrepareInstructionCS *prep_cs = prep.mutable_instruction_cs();
+                prep_cs->set_operation(op);
+            }
+    peer_team_->send(prep);
+}
+
+
+
 
 ///// TEST
 void send_machine_state(std::string name, MachineState state) {
