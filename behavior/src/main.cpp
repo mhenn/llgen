@@ -8,18 +8,15 @@ using namespace BT;
 
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
+
+     <include path="../src/Genetic.xml"/>
+
      <BehaviorTree ID="MainTree">
          <Parallel>
             <Repeat num_cycles="-1">
                 <Beacon name="Bacon"/>
             </Repeat>
-            <Sequence name="main">
-                <Action ID="RETRIEVE_CAP"/>
-                <Action ID="GET_BASE"/>
-                <Action ID="INPUT_BASE"/>
-                <Action ID="MOUNT_CAP"/>
-                <Action ID="DELIVER"/>
-            </Sequence>
+            <SubTree ID="GP"/>
         </Parallel>
      </BehaviorTree>
  </root>
