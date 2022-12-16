@@ -13,9 +13,13 @@ static const char* xml_text = R"(
 
      <BehaviorTree ID="MainTree">
          <Parallel>
-            <Repeat num_cycles="-1">
+            <Repeat num_cycles='-1'>
                 <Beacon name="Bacon"/>
             </Repeat>
+            <Fallback>
+
+                <Beacon name="Bacon"/>
+            <Fallback/>
             <SubTree ID="GP"/>
         </Parallel>
      </BehaviorTree>

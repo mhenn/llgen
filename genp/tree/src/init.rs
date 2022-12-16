@@ -150,8 +150,8 @@ use std::{fmt::Debug, time::Instant};
 
 pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();
-    let depth = 3;
-    let width = 3;
+    let depth = 2;
+    let width = 4;
     gen_rnd_expr_tree(&nodes, depth, width, false, &mut Counter::new()).unwrap()
 }
 
@@ -181,17 +181,20 @@ fn gen_tree_node_count() {
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
 
+
 #[test]
 fn gen_tree_to_xml() {
     let start = Instant::now();
     let expr = get_test_tree();
-    print!("{:?}", expr);
+    println!("{:?}", expr);
     let xml = to_xml(&expr, &get_xml_delims());
     let xml: String = xml.into_iter().collect();
     println!("{:?}", xml);
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
+    assert!(false)
 }
+
 #[test]
 fn gen_full_tree() {
     let start = Instant::now();
