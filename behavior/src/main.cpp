@@ -16,16 +16,28 @@ static const char* xml_text = R"(
             <Repeat num_cycles='-1'>
                 <Beacon name="Bacon"/>
             </Repeat>
-            <Fallback>
-
-                <Beacon name="Bacon"/>
-            <Fallback/>
-            <SubTree ID="GP"/>
+            <Sequence name="rootseq">
+                <Action ID="PRODUCTION"/>
+                <SubTree ID="GP"/>
+            </Sequence>
         </Parallel>
      </BehaviorTree>
  </root>
  )";
 
+
+static const char* xml_test = R"(
+ <root main_tree_to_execute = "MainTree" >
+     <BehaviorTree ID="MainTree">
+            <Fallback>
+                <Repeat num_cycles="-1">
+                    <Beacon name="Bacon"/>
+                </Repeat>
+            </Fallback>
+     </BehaviorTree>
+ </root>
+
+)";
 
 
 int main()
@@ -36,10 +48,15 @@ int main()
     factory.registerNodeType<Beacon>("Beacon");
     factory.registerSimpleAction("RETRIEVE_CAP", std::bind(&InteractionInterface::retrieve_cap,&inter ));
     factory.registerSimpleAction("GET_BASE", std::bind(&InteractionInterface::get_base,&inter ));
-    factory.registerSimpleAction("INPUT_BASE", std::bind(&InteractionInterface::base_to_cs,&inter ));
+//    factory.registerSimpleAction("INPUT_BASE", std::bind(&InteractionInterface::base_to_cs,&inter ));
     factory.registerSimpleAction("MOUNT_CAP", std::bind(&InteractionInterface::mount_cap,&inter ));
     factory.registerSimpleAction("DELIVER", std::bind(&InteractionInterface::deliver,&inter ));
+    factory.registerSimpleAction("PRODUCTION", std::bind(&InteractionInterface::production,&inter ));
     auto tree = factory.createTreeFromText(xml_text);
+//    auto tree = factory.createTreeFromText(xml_test);
+//    auto blackboard = tree.rootBlackboard();
+//    blackboard->set("test", false);
+
 
     setup_proto();
     setup_client();

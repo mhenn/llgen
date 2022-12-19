@@ -11,6 +11,7 @@ use crate::{
 };
 
 pub fn evolution_cycle<T>(
+    cycles: usize,
     init: fn(usize, &Nodes<T>, &Settings) -> Vec<Individual<T>>,
     nodes: &Nodes<T>,
     pop_size: usize,
@@ -23,14 +24,23 @@ pub fn evolution_cycle<T>(
 ) where
     T: Copy + Clone + Default + Debug,
 {
+    let mut count = 0;
     //Todo: settings & get_nodes
     let settings = Settings::new().unwrap();
     let mut pop = Generation::new(pop_size);
+    loop{
+        let start = Instant::now();
+        if count == cycles{
+            break;
+        }
     pop.populate(nodes, &settings, init);
     evaluate(&mut pop.individuals);
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
-    //    pop.mutate(mutation);
+    count += 1;
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+    }
 }
 
 pub fn evaluate<T>(inds: &mut Vec<Individual<T>>) {
@@ -56,15 +66,17 @@ fn evolve() {
     let nodes = get_nodes();
         let start = Instant::now();
     evolution_cycle(
+        10,
         ramped_half_half,
         &nodes,
-        1000,
+        100,
         0.25,
         evaluate,
         tree_crossover,
         roulette_wheel,
     );
     let duration = start.elapsed();
-
     println!("Time elapsed in expensive_function() is: {:?}", duration);
+    assert!(false);
+
 }

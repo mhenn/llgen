@@ -33,7 +33,7 @@ unsigned long seq_ = 0;
 
 
 void handle_beacon() {
-    usleep(1000);
+    usleep(4000);
   boost::posix_time::ptime now(
       boost::posix_time::microsec_clock::universal_time());
   std::shared_ptr<BeaconSignal> signal(new BeaconSignal());

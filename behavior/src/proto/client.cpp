@@ -50,19 +50,6 @@ send_add_base(){
 
 }
 
-void pick_base(){
-
-}
-
-void place_base(){
-}
-
-void pick_product(){
-}
-
-void deliver_product(){
-}
-
 void
 send_game_state(std::string state, std::string phase){
 
@@ -103,7 +90,6 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
             usleep(1000000);
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
-            second = true;
     }
    // else if(second){
    //     third = true;

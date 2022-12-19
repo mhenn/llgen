@@ -6,28 +6,29 @@ using BT::NodeStatus;
 
 class InteractionInterface
 {
+    int time= 2000000;
   public:
     InteractionInterface(){}
 
     NodeStatus retrieve_cap(){
         send_action("C-CS1", "CS", "RETRIEVE_CAP");
-        usleep(2000000);
+        usleep(time);
         return BT::NodeStatus::SUCCESS;
 
     }
     NodeStatus get_base(){
         send_action("C-BS", "BS", "", "INPUT", "BASE_RED");
-        usleep(2000000);
+        usleep(time);
         return BT::NodeStatus::SUCCESS;
     }
-    NodeStatus base_to_cs(){
-        send_action("C-BS", "BS", "", "INPUT","BASE_RED");
-        usleep(2000000);
-        return BT::NodeStatus::SUCCESS;
-    }
+//    NodeStatus base_to_cs(){
+//        send_action("C-BS", "BS", "", "INPUT","BASE_RED");
+//        usleep(time);
+//        return BT::NodeStatus::SUCCESS;
+//    }
     NodeStatus mount_cap(){
         send_action("C-CS1", "CS", "MOUNT_CAP");
-        usleep(2000000);
+        usleep(time);
         return BT::NodeStatus::SUCCESS;
     }
     NodeStatus deliver(){
@@ -35,5 +36,11 @@ class InteractionInterface
         return BT::NodeStatus::SUCCESS;
     }
 
+    NodeStatus production(){
+        usleep(time);
+        return BT::NodeStatus::SUCCESS;
+    }
+
 };
+
 

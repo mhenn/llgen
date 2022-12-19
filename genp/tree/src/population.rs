@@ -103,10 +103,8 @@ pub fn roulette_wheel<T>(individuals: &Vec<Individual<T>>) -> IndividualTuple<T>
 where
     T: Copy,
 {
-    println!("len: {:?}", individuals.len());
     let i1 = individuals
         .choose_weighted(&mut thread_rng(), |item| {
-            println!("{:?}", item.fitness);
             item.fitness_percentage
         })
         .unwrap()
@@ -203,7 +201,6 @@ where
         let mut elites = self.select_elites(elite_percentage);
         let mut next_gen = self.crossover(offspring, combine, selection);
         let split_at = (self.size - (self.size as f64 * elite_percentage) as usize);
-        println!("{:?}", split_at);
         next_gen.split_off(split_at);
         next_gen.append(&mut elites);
         // maybe a new generation should be returned instead
@@ -243,14 +240,8 @@ where
 fn gen_tree_tree_crossover() {
     let expr1 = get_test_tree_with(2, 3);
     let expr2 = get_test_tree_with(2, 3);
-    print!("{:?}", expr1);
-    println!();
-    println!("{:?}", expr2);
     let (expr1, expr2) = subtree_crossover(expr1, expr2);
-    println!();
 
-    println!("{:?}", expr1);
-    println!("{:?}", expr2);
 }
 
 #[test]
@@ -258,12 +249,6 @@ fn gen_tree_node_crossover() {
     let constraints = get_nodes();
     let expr1 = get_test_tree_with(1, 2);
     let expr2 = get_test_tree_with(1, 2);
-    print!("{:?}", expr1);
-    println!();
-    println!("{:?}", expr2);
     let (expr1, expr2) = node_crossover(expr1, expr2, &constraints);
 
-    println!("{:?}", expr1);
-    println!();
-    println!("{:?}", expr2);
 }

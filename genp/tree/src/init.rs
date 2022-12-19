@@ -150,8 +150,8 @@ use std::{fmt::Debug, time::Instant};
 
 pub fn get_test_tree<'a>() -> Node<&'a str> {
     let nodes = get_nodes();
-    let depth = 2;
-    let width = 4;
+    let depth = 1;
+    let width = 6;
     gen_rnd_expr_tree(&nodes, depth, width, false, &mut Counter::new()).unwrap()
 }
 
