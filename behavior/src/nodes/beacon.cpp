@@ -15,7 +15,7 @@ public:
 
   BT::NodeStatus tick() override
   {
-    handle_beacon();
+//    handle_beacon();
 
     return BT::NodeStatus::SUCCESS;
   }

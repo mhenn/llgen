@@ -30,10 +30,13 @@ ProtobufBroadcastPeer *peer_public_ = NULL;
 ProtobufBroadcastPeer *peer_team_ = NULL;
 Team team_color_ = CYAN;
 unsigned long seq_ = 0;
+std::string ccs1 = "";
+std::string cbs = "";
+
+static boost::asio::deadline_timer *timer_ = NULL;
 
 
-void handle_beacon() {
-    usleep(4000);
+void handle_beacon(const boost::system::error_code &error){
   boost::posix_time::ptime now(
       boost::posix_time::microsec_clock::universal_time());
   std::shared_ptr<BeaconSignal> signal(new BeaconSignal());
@@ -63,133 +66,28 @@ void handle_beacon() {
   signal->set_seq(++seq_);
   peer_team_->send(signal);
 
+    timer_->expires_at(timer_->expires_at() + boost::posix_time::milliseconds(2000));
+		timer_->async_wait(handle_beacon);
 }
+
+
+
 
 ///////////TEST
 //#prepare cap
-void send_retrieve_cap(){
-        CSOp op;
-        MachineSide bs_side;
-        BaseColor bs_color;
-
-        std::string machine_name = "C-BS";
-        std::string machine_type = "BS";
-        std::string side = "INPUT";
-        std::string base = "BASE_RED";
-
-        //llsf_msgs::CSOp_Parse(operation, op);
-        llsf_msgs::MachineSide_Parse(side, &bs_side);
-		llsf_msgs::BaseColor_Parse(base,&bs_color);
-
-    printf("Announcing machine type\n");
-			llsf_msgs::PrepareMachine prep;
-			prep.set_team_color(team_color_);
-			prep.set_machine(machine_name);
-			auto duration = std::chrono::system_clock::now().time_since_epoch();
-			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-			prep.set_sent_at(millis);
-			if (machine_type == "BS") {
-				llsf_msgs::PrepareInstructionBS *prep_bs = prep.mutable_instruction_bs();
-				prep_bs->set_side(bs_side);
-				prep_bs->set_color(bs_color);
-				printf("Set BS side %s  color %s\n",
-				      MachineSide_Name(bs_side).c_str(),
-				      BaseColor_Name(bs_color).c_str());
-            }
-            peer_team_->send(prep);
-}
 //#get base
 //./rcll-prepare-machine Carologistics C-BS INPUT BASE_BLACK & sleep 10 ; kill $!
 //
 
-void send_mount_cap(){
-        CSOp op;
-
-        std::string machine_name = "C-CS1";
-        std::string machine_type = "CS";
-
-        llsf_msgs::CSOp_Parse("MOUNT_CAP", &op);
-
-    printf("Announcing machine type\n");
-			llsf_msgs::PrepareMachine prep;
-			prep.set_team_color(team_color_);
-			prep.set_machine(machine_name);
-			auto duration = std::chrono::system_clock::now().time_since_epoch();
-			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-			prep.set_sent_at(millis);
-            PrepareInstructionCS *prep_cs = prep.mutable_instruction_cs();
-            prep_cs->set_operation(op);
-            peer_team_->send(prep);
-}
 //#mount cap
 //./rcll-prepare-machine Carologistics C-CS1 MOUNT_CAP & sleep 10 ; kill $!
 //
 //#deliver
 //./rcll-prepare-machine Carologistics C-DS 3 & sleep 10 ; kill $!
 
-void send_deliver(){
-        CSOp op;
-        MachineSide bs_side;
-        BaseColor bs_color;
-
-        std::string machine_name = "C-DS";
-        std::string machine_type = "DS";
-
-
-    printf("Announcing machine type\n");
-			llsf_msgs::PrepareMachine prep;
-			prep.set_team_color(team_color_);
-			prep.set_machine(machine_name);
-			auto duration = std::chrono::system_clock::now().time_since_epoch();
-			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-			prep.set_sent_at(millis);
-
-            llsf_msgs::PrepareInstructionDS *prep_ds = prep.mutable_instruction_ds();
-            prep_ds->set_order_id(1);
-
-
-            peer_team_->send(prep);
-}
 
 //void send_prepare_machine(std::string machine_name, std::string machine_type,
 //         std::string side, std::string base, std::string operation){
-void send_get_base(){
-        CSOp op;
-        MachineSide bs_side;
-        BaseColor bs_color;
-
-        std::string machine_name = "C-BS";
-        std::string machine_type = "BS";
-        std::string side = "INPUT";
-        std::string base = "BASE_RED";
-
-        //llsf_msgs::CSOp_Parse(operation, op);
-        llsf_msgs::MachineSide_Parse(side, &bs_side);
-		llsf_msgs::BaseColor_Parse(base,&bs_color);
-
-    printf("Announcing machine type\n");
-			llsf_msgs::PrepareMachine prep;
-			prep.set_team_color(team_color_);
-			prep.set_machine(machine_name);
-			auto duration = std::chrono::system_clock::now().time_since_epoch();
-			auto millis   = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-			prep.set_sent_at(millis);
-			if (machine_type == "BS") {
-				llsf_msgs::PrepareInstructionBS *prep_bs = prep.mutable_instruction_bs();
-				prep_bs->set_side(bs_side);
-				prep_bs->set_color(bs_color);
-				printf("Set BS side %s  color %s\n",
-				      MachineSide_Name(bs_side).c_str(),
-				      BaseColor_Name(bs_color).c_str());
-            }
-            else if (machine_type == "CS") {
-                            PrepareInstructionCS *prep_cs = prep.mutable_instruction_cs();
-                            prep_cs->set_operation(op);
-            }
-            peer_team_->send(prep);
-}
-
-
 void send_action(std::string name, std::string type, std::string operation = "",
         std::string side ="", std::string base = ""){
     CSOp op;
@@ -272,7 +170,10 @@ void handle_message(boost::asio::ip::udp::endpoint &sender,
     printf("MachineInfo received:\n");
     for (int i = 0; i < mi->machines_size(); ++i) {
       const Machine &m = mi->machines(i);
-
+      if (m.name() == "C-CS1")
+          ccs1 = m.state();
+      else if (m.name() == "C-BS")
+          cbs = m.state();
       printf("  %s, state: %s, color: %s\n", m.name().c_str(),
              m.state().c_str(), "");
     }
@@ -361,7 +262,11 @@ void setup_proto() {
 //  peer_public_->signal_received().connect(handle_message);
 //  peer_public_->signal_recv_error().connect(handle_recv_error);
 //  peer_public_->signal_send_error().connect(handle_send_error);
+	boost::asio::io_service io_service;
 
+    timer_ = new boost::asio::deadline_timer(io_service);
+	timer_->expires_from_now(boost::posix_time::milliseconds(2000));
+	timer_->async_wait(handle_beacon);
 }
 
 #endif

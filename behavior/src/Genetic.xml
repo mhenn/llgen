@@ -1,9 +1,9 @@
 <root  >
      <BehaviorTree ID="GP">
         <Sequence name="main">
-            <Action ID="RETRIEVE_CAP"/>
-            <Action ID="GET_BASE"/>
-            <Action ID="MOUNT_CAP"/>
+            <RetrieveCap />
+            <GetBase />
+            <MountCap />
             <Action ID="DELIVER"/>
         </Sequence>
      </BehaviorTree>

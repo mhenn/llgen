@@ -82,12 +82,12 @@ client_msg(uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf
         if ((v = std::dynamic_pointer_cast<VersionInfo>(msg))) {
 			// connected, send what we came for
             send_team();
-            send_game_state("SETUP", "RUNNING");
+         //   send_game_state("SETUP", "RUNNING");
 	}
 
     std::shared_ptr<GameState> gs;
 	if ((gs = std::dynamic_pointer_cast<GameState>(msg)) && !switched) {
-            usleep(1000000);
+            usleep(2000000);
             send_game_state("PRODUCTION", "RUNNING");
             switched = true;
     }
