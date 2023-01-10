@@ -144,7 +144,7 @@ void setup_client(){
 	client_->signal_received().connect(client_msg);
 	client_->signal_disconnected().connect(handle_disconnected);
     //client_->async_connect("172.18.0.22", 4444);
-    client_->async_connect("localhost", 4444);
+    client_->async_connect(host.c_str(), 4444);
 
     boost::asio::signal_set signals(io_service_, SIGINT, SIGTERM);
 

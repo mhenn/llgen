@@ -26,6 +26,8 @@ using namespace llsf_msgs;
 #define CRYPTO_KEY "randomkey"
 #define CRYPTO_CIPHER "aes-128-cbc"
 
+std::string host = "172.18.0.22";
+
 ProtobufBroadcastPeer *peer_public_ = NULL;
 ProtobufBroadcastPeer *peer_team_ = NULL;
 Team team_color_ = CYAN;
@@ -239,7 +241,7 @@ void handle_message(boost::asio::ip::udp::endpoint &sender,
 
 void setup_proto() {
   //    string host = "172.18.0.22";
-  std::string host = "localhost";
+  //std::string host = "localhost";
   //peer_public_ = new ProtobufBroadcastPeer(host, 4445, 4444);
   //peer_team_ = new ProtobufBroadcastPeer(host, 4446, 4441, CRYPTO_KEY, CRYPTO_CIPHER);
   peer_team_ = new ProtobufBroadcastPeer(host, 4446, 4441);
