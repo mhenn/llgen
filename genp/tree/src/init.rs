@@ -1,5 +1,7 @@
 use crate::{constraints::*, nodes::*, population::*, settings::*};
 use rand::{seq::SliceRandom, Rng};
+use std::fs::File;
+use std::io::prelude::*;
 
 pub fn to_list<T>(node: &Node<T>, delimeter: &(T, T)) -> Vec<T>
 where
@@ -46,6 +48,16 @@ where
     expr.push(delimeter.2);
 
     expr
+}
+
+
+pub fn write_to_file(text:String)
+{
+    let mut file = File::create("foo.xml").unwrap();
+    let mut out :String = "<root> <BehaviorTree ID='GP'>".to_owned();
+    out = out + &text;
+    out.push_str("</BehaviorTree></root>");
+    file.write_all(out.as_bytes());
 }
 
 pub fn ramped_half_half<T>(size: usize, nodes: &Nodes<T>, config: &Settings) -> Vec<Individual<T>>
@@ -181,6 +193,13 @@ fn gen_tree_node_count() {
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
 
+#[test]
+fn aids() {
+    let expr = get_test_tree();
+    let xml = to_xml(&expr, &get_xml_delims());
+    let xml: String = xml.into_iter().collect();
+    write_to_file(xml)
+}
 
 #[test]
 fn gen_tree_to_xml() {
@@ -192,7 +211,6 @@ fn gen_tree_to_xml() {
     println!("{:?}", xml);
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
-    assert!(false)
 }
 
 #[test]

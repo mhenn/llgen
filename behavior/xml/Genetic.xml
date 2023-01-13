@@ -1,4 +1,4 @@
-<root  >
+<root>
      <BehaviorTree ID="GP">
         <Sequence name="main">
             <RetrieveCap />
