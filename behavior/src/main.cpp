@@ -17,7 +17,7 @@ using namespace BT;
 
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
-     <include path="../xml/Genetic.xml"/>
+     <include path="../xml/generated.xml"/>
      <BehaviorTree ID="MainTree">
             <Sequence name="rootseq">
                 <Action ID="PRODUCTION"/>

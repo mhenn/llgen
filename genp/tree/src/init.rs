@@ -51,9 +51,9 @@ where
 }
 
 
-pub fn write_to_file(text:String)
+pub fn write_to_file(text:String, path:String)
 {
-    let mut file = File::create("foo.xml").unwrap();
+    let mut file = File::create(path).unwrap();
     let mut out :String = "<root> <BehaviorTree ID='GP'>".to_owned();
     out = out + &text;
     out.push_str("</BehaviorTree></root>");
@@ -198,7 +198,8 @@ fn aids() {
     let expr = get_test_tree();
     let xml = to_xml(&expr, &get_xml_delims());
     let xml: String = xml.into_iter().collect();
-    write_to_file(xml)
+    //write_to_file(xml, "../../behavior/xml/generated.xml".to_string())
+    write_to_file(xml, "../behavior/xml/generated.xml".to_string())
 }
 
 #[test]
@@ -221,6 +222,7 @@ fn gen_full_tree() {
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
+
 pub fn get_xml_delims<'a>() -> (&'a str, &'a str, &'a str) {
     ("<", "/", ">")
 }

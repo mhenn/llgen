@@ -35,8 +35,8 @@ pub fn intermediates<'a>() -> Vec<IntermediateNode<&'a str>> {
 }
 
 pub fn leafs<'a>() -> Vec<&'a str> {
-    vec!["Action ID='RETRIEVE_CAP'", "Action ID='GET_BASE'", "Action ID='INPUT_BASE'",
-    "Action ID='MOUNT_CAP'", "Action ID='DELIVER'"]
+    vec!["RetrieveCap", "GetBase",
+    "MountCap", "Action ID='DELIVER'"]
 }
 pub fn get_delim<'a>() -> (&'a str, &'a str) {
     ("(", ")")

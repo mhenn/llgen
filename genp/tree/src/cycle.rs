@@ -4,10 +4,10 @@ use rand::Rng;
 
 use crate::{
     constraints::get_nodes,
-    init::ramped_half_half,
+    init::{ramped_half_half, to_xml, get_xml_delims, write_to_file},
     nodes::Nodes,
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings,
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT},
 };
 
 pub fn evolution_cycle<T>(
@@ -33,6 +33,8 @@ pub fn evolution_cycle<T>(
         if count == cycles{
             break;
         }
+
+
     pop.populate(nodes, &settings, init);
     evaluate(&mut pop.individuals);
     pop.set_fitness_percentages();
@@ -43,9 +45,19 @@ pub fn evolution_cycle<T>(
     }
 }
 
-pub fn evaluate<T>(inds: &mut Vec<Individual<T>>) {
-    for chromosome in inds.iter_mut() {
-        chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
+pub fn evaluate<T>(inds: &mut Vec<Individual<T>>)
+    where
+    T: Default + Copy,
+    String: From<T>
+{
+    for individual in inds.iter_mut() {
+        //chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
+        let chrom = &individual.chromosome;
+        let xml: String = node_to_xml_string(chrom, &get_xml_delims());
+        write_to_file(xml, "../behavior/xml/generated.xml".to_string())
+        docker_start();
+        execute_BT();
+
     }
 }
 pub fn crop<T>(pop_fitness: f64, ind: &Individual<T>) -> bool {
@@ -61,7 +73,7 @@ fn ramped_hh() {
 
 use std::time::{Duration, Instant};
 
-#[test]
+//#[test]
 fn evolve() {
     let nodes = get_nodes();
         let start = Instant::now();
@@ -78,5 +90,4 @@ fn evolve() {
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
     assert!(false);
-
 }

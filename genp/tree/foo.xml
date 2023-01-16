@@ -6,6 +6,6 @@
             <Action ID='GET_BASE'/>
             <Action ID='DELIVER'/>
             <Action ID='MOUNT_CAP'/>
-</Sequence>
-</BehaviorTree>
+        </Sequence>
+    </BehaviorTree>
 </root>

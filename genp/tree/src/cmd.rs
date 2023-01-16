@@ -1,13 +1,10 @@
 use std::process::Command;
 
-
-
 pub fn docker_start(){
     let output = Command::new("sh")
         .arg("-c")
         .arg("docker run --net ref1 --ip 172.18.0.22  --rm refbox-fast")
         .output();
-
 }
 
 pub fn docker_kill_all(){
@@ -17,12 +14,13 @@ pub fn docker_kill_all(){
         .output();
 }
 
-pub fn execute_BT(){
+pub fn execute_BT() -> std::process::Output{
 
     let output = Command::new("sh")
         .arg("-c")
-        .arg("../../../behavior/build/BTRCLL")
+        .arg("../../behavior/build/BTRCLL")
         .output();
+    output.unwrap()
 }
 
 pub fn get_result(){
@@ -35,7 +33,6 @@ pub fn get_result(){
 }
 
 
-
 #[test]
 pub fn execute_cmd_test(){
     let output = Command::new("sh")
@@ -45,8 +42,13 @@ pub fn execute_cmd_test(){
     println!("{:?}",output.unwrap());
 }
 
+#[test]
+pub fn execute_bt_test(){
+    let out = execute_BT();
+    println!("{:?}", out);
+        assert!(false)
+}
 
 #[test]
 pub fn execute_docker_test(){
-    docker_start();
 }
