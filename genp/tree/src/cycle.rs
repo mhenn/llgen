@@ -1,13 +1,12 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, time, thread};
 
-use rand::Rng;
 
 use crate::{
     constraints::get_nodes,
-    init::{ramped_half_half, to_xml, get_xml_delims, write_to_file},
+    init::{ramped_half_half, get_xml_delims, write_to_file},
     nodes::Nodes,
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT},
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result},
 };
 
 pub fn evolution_cycle<T>(
@@ -16,7 +15,7 @@ pub fn evolution_cycle<T>(
     nodes: &Nodes<T>,
     pop_size: usize,
     elite_percentage: f64,
-    evaluate: fn(&mut Vec<Individual<T>>),
+    evaluate: fn(&mut Vec<Individual<T>>, id: u32),
     //    crop: fn(f64, &Individual<T>) -> bool,
     //    mutation: fn(&Individual<T>) -> Individual<T>,
     combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
@@ -36,7 +35,7 @@ pub fn evolution_cycle<T>(
 
 
     pop.populate(nodes, &settings, init);
-    evaluate(&mut pop.individuals);
+    evaluate(&mut pop.individuals, count as u32);
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
     count += 1;
@@ -45,18 +44,26 @@ pub fn evolution_cycle<T>(
     }
 }
 
-pub fn evaluate<T>(inds: &mut Vec<Individual<T>>)
+pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
     where
     T: Default + Copy,
     String: From<T>
 {
+    let mut ind_id: u32 = 0;
+    let fiver  = time::Duration::from_secs(5);
+    let thirty  = time::Duration::from_secs(30);
     for individual in inds.iter_mut() {
+        ind_id += 1;
         //chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
         let chrom = &individual.chromosome;
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
-        write_to_file(xml, "../behavior/xml/generated.xml".to_string())
+        write_to_file(xml, "../behavior/xml/generated.xml".to_string());
         docker_start();
+        thread::sleep(fiver);
         execute_BT();
+        thread::sleep(thirty);
+        let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
+        write_result("./output/".to_owned() + &cur_id);
 
     }
 }
@@ -71,7 +78,7 @@ fn ramped_hh() {
     let _ret = ramped_half_half(size, &nodes, &config);
 }
 
-use std::time::{Duration, Instant};
+use std::time::{ Instant};
 
 //#[test]
 fn evolve() {
@@ -90,4 +97,16 @@ fn evolve() {
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
     assert!(false);
+}
+
+#[test]
+fn eval_test(){
+
+    let nodes = get_nodes();
+    let settings = Settings::new().unwrap();
+    let mut pop = Generation::new(1);
+    println!("{:?}", pop.individuals.get(0).unwrap());
+    pop.populate(&nodes, &settings, ramped_half_half);
+    evaluate(&mut pop.individuals, 0);
+
 }

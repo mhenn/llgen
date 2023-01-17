@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use crate::init::{write_to_file };
+
 pub fn docker_start(){
     let output = Command::new("sh")
         .arg("-c")
@@ -23,13 +25,14 @@ pub fn execute_BT() -> std::process::Output{
     output.unwrap()
 }
 
-pub fn get_result(){
+pub fn write_result(path: String){
 
     let output = Command::new("sh")
         .arg("-c")
         .arg("./getResults.bash")
         .output();
-    println!("{:?}",output.unwrap());
+    let out : String = String::from_utf8(output.unwrap().stdout).unwrap();
+    write_to_file(out, path);
 }
 
 
@@ -46,8 +49,10 @@ pub fn execute_cmd_test(){
 pub fn execute_bt_test(){
     let out = execute_BT();
     println!("{:?}", out);
-        assert!(false)
+    assert!(false)
 }
+
+
 
 #[test]
 pub fn execute_docker_test(){
