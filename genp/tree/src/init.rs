@@ -50,14 +50,18 @@ where
     expr
 }
 
-
 pub fn write_to_file(text:String, path:String)
 {
     let mut file = File::create(path).unwrap();
+    file.write_all(text.as_bytes());
+}
+
+pub fn write_bt_to_file(text:String, path:String)
+{
     let mut out :String = "<root> <BehaviorTree ID='GP'>".to_owned();
     out = out + &text;
     out.push_str("</BehaviorTree></root>");
-    file.write_all(out.as_bytes());
+    write_to_file(out, path)
 }
 
 pub fn ramped_half_half<T>(size: usize, nodes: &Nodes<T>, config: &Settings) -> Vec<Individual<T>>
@@ -193,7 +197,6 @@ fn gen_tree_node_count() {
     println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
 
-#[test]
 fn aids() {
     let expr = get_test_tree();
     let xml = to_xml(&expr, &get_xml_delims());

@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{process::{Command, Child}, error::Error};
 
 use crate::init::{write_to_file };
 
@@ -6,7 +6,7 @@ pub fn docker_start(){
     let output = Command::new("sh")
         .arg("-c")
         .arg("docker run --net ref1 --ip 172.18.0.22  --rm refbox-fast")
-        .output();
+        .spawn();
 }
 
 pub fn docker_kill_all(){
@@ -16,13 +16,19 @@ pub fn docker_kill_all(){
         .output();
 }
 
-pub fn execute_BT() -> std::process::Output{
+pub fn execute_BT() -> Result<Child, std::io::Error>  {
 
-    let output = Command::new("sh")
+    Command::new("sh")
         .arg("-c")
         .arg("../../behavior/build/BTRCLL")
+        .spawn()
+}
+
+pub fn kill_BT(){
+    Command::new("sh")
+        .arg("-c")
+        .arg("killall BTRCLL")
         .output();
-    output.unwrap()
 }
 
 pub fn write_result(path: String){
@@ -35,8 +41,32 @@ pub fn write_result(path: String){
     write_to_file(out, path);
 }
 
+pub fn docker_prune(){
 
-#[test]
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("docker container prune --force")
+        .spawn();
+}
+
+pub fn docker_copy(){
+
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("docker cp ./kill.bash $(docker container ps -aq):/kill.bash")
+        .spawn();
+}
+
+pub fn stop_refbox(){
+
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("docker exec -it $(docker container ls -aq) bash kill.bash")
+        .output();
+}
+
+
+
 pub fn execute_cmd_test(){
     let output = Command::new("sh")
         .arg("-c")
@@ -45,7 +75,6 @@ pub fn execute_cmd_test(){
     println!("{:?}",output.unwrap());
 }
 
-#[test]
 pub fn execute_bt_test(){
     let out = execute_BT();
     println!("{:?}", out);

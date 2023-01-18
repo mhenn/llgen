@@ -3,10 +3,10 @@ use std::{fmt::Debug, time, thread};
 
 use crate::{
     constraints::get_nodes,
-    init::{ramped_half_half, get_xml_delims, write_to_file},
+    init::{ramped_half_half, get_xml_delims, write_to_file, write_bt_to_file},
     nodes::Nodes,
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result},
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune},
 };
 
 pub fn evolution_cycle<T>(
@@ -53,17 +53,23 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
     let fiver  = time::Duration::from_secs(5);
     let thirty  = time::Duration::from_secs(30);
     for individual in inds.iter_mut() {
+        docker_prune();
         ind_id += 1;
         //chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
         let chrom = &individual.chromosome;
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
-        write_to_file(xml, "../behavior/xml/generated.xml".to_string());
+       // write_bt_to_file(xml, "../xml/generated.xml".to_string());
         docker_start();
         thread::sleep(fiver);
-        execute_BT();
+        let mut handle = execute_BT().unwrap();
         thread::sleep(thirty);
+        handle.kill();
+        kill_BT();
+        docker_copy();
+        stop_refbox();
         let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
         write_result("./output/".to_owned() + &cur_id);
+//        docker_kill_all();
 
     }
 }
@@ -105,8 +111,9 @@ fn eval_test(){
     let nodes = get_nodes();
     let settings = Settings::new().unwrap();
     let mut pop = Generation::new(1);
-    println!("{:?}", pop.individuals.get(0).unwrap());
+    println!("REEEEEEEEEE" );
     pop.populate(&nodes, &settings, ramped_half_half);
     evaluate(&mut pop.individuals, 0);
+    assert!(false)
 
 }
