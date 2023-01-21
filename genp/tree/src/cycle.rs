@@ -6,7 +6,7 @@ use crate::{
     init::{ramped_half_half, get_xml_delims, write_to_file, write_bt_to_file},
     nodes::Nodes,
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune},
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune}, parse::parse_points,
 };
 
 pub fn evolution_cycle<T>(
@@ -39,8 +39,6 @@ pub fn evolution_cycle<T>(
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
     count += 1;
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
     }
 }
 
@@ -54,11 +52,12 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
     let thirty  = time::Duration::from_secs(30);
     for individual in inds.iter_mut() {
         docker_prune();
+        let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
         ind_id += 1;
-        //chromosome.fitness = rand::thread_rng().gen_range(1..100) as f64;
         let chrom = &individual.chromosome;
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
-       // write_bt_to_file(xml, "../xml/generated.xml".to_string());
+        write_bt_to_file(&xml, "../xml/generated.xml".to_string());
+        write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
         docker_start();
         thread::sleep(fiver);
         let mut handle = execute_BT().unwrap();
@@ -67,10 +66,10 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
         kill_BT();
         docker_copy();
         stop_refbox();
-        let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
         write_result("./output/".to_owned() + &cur_id);
-//        docker_kill_all();
-
+        let points = parse_points("./output/".to_owned() + &cur_id);
+        individual.fitness = points as f64;
+        docker_kill_all();
     }
 }
 pub fn crop<T>(pop_fitness: f64, ind: &Individual<T>) -> bool {
@@ -86,16 +85,16 @@ fn ramped_hh() {
 
 use std::time::{ Instant};
 
-//#[test]
+#[test]
 fn evolve() {
     let nodes = get_nodes();
         let start = Instant::now();
     evolution_cycle(
-        10,
+        25,
         ramped_half_half,
         &nodes,
-        100,
-        0.25,
+        25,
+        0.1,
         evaluate,
         tree_crossover,
         roulette_wheel,
@@ -105,15 +104,16 @@ fn evolve() {
     assert!(false);
 }
 
-#[test]
+//#[test]
 fn eval_test(){
 
     let nodes = get_nodes();
     let settings = Settings::new().unwrap();
-    let mut pop = Generation::new(1);
-    println!("REEEEEEEEEE" );
+    let mut pop = Generation::new(4);
     pop.populate(&nodes, &settings, ramped_half_half);
+    println!("Before {:?}", pop.individuals.get(0).unwrap().fitness);
     evaluate(&mut pop.individuals, 0);
+    println!("After {:?}", pop.individuals.get(0).unwrap().fitness);
     assert!(false)
 
 }

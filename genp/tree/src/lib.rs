@@ -6,3 +6,4 @@ pub mod population;
 pub mod settings;
 pub mod xml;
 pub mod cmd;
+pub mod parse;

@@ -1,0 +1,1 @@
+<root> <BehaviorTree ID='GP'><Sequence><RetrieveCap/><MountCap/><GetBase/><MountCap/><GetBase/><Action ID='DELIVER'/><RetrieveCap/><GetBase/><GetBase/></Sequence></BehaviorTree></root>

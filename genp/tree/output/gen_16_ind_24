@@ -1,0 +1,5 @@
+I 14:58:03.544150 C: Giving 20 points to team CYAN: Delivered item for order 1 (PRODUCTION @ 20.000196)
+I 14:58:03.546269 C: Giving 10 points to team CYAN: Mounted cap for order 1 (PRODUCTION @ 0.1)
+I 14:58:11.062794 C: Giving 2 points to team CYAN: Retrieved cap at C-CS1 (PRODUCTION @ 55.200156)
+I 14:58:12.383332 C: Giving -2 points to team CYAN: Deducting retrieved cap at C-CS1 (PRODUCTION @ 60.47998)
+I 14:58:16.824645 C: Giving 1 points to team CYAN: Delivered item for order 1 (too many) (PRODUCTION @ 73.11978)

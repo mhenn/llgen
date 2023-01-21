@@ -56,7 +56,7 @@ pub fn write_to_file(text:String, path:String)
     file.write_all(text.as_bytes());
 }
 
-pub fn write_bt_to_file(text:String, path:String)
+pub fn write_bt_to_file(text:&String, path:String)
 {
     let mut out :String = "<root> <BehaviorTree ID='GP'>".to_owned();
     out = out + &text;
