@@ -19,7 +19,7 @@ where
     let val : String = node.value.try_into().unwrap();
     let mut expr: String = "".to_owned();
     expr.push_str(delimeter.0);
-    expr.push_str(&val.to_string());
+    expr.push_str(&val);
 
     if node.children.is_empty() {
         expr.push_str(delimeter.1);
@@ -35,7 +35,7 @@ where
     }
     expr.push_str(delimeter.0);
     expr.push_str(delimeter.1);
-    expr.push_str(&val.to_string());
+    expr.push_str(&val);
     expr.push_str(delimeter.2);
 
     expr

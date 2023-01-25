@@ -59,6 +59,14 @@ where
         }
     }
 
+
+    pub fn delete_by_id(&mut self, id: usize ){
+        let  children = self.children.clone();
+        self.children = children.into_iter().filter(|x| x.id != id).collect();
+        let  children = self.children.clone();
+        self.children = children.into_iter().map(|mut x| {x.delete_by_id(id); x}).collect();
+    }
+
     pub fn bfs(&self) {
         let mut q: VecDeque<&Node<T>> = VecDeque::new();
         q.push_front(self);
@@ -88,6 +96,7 @@ where
         }
         self.value = node.value.clone();
     }
+
 }
 
 pub fn set_single_node_by_id<T>(
@@ -136,13 +145,39 @@ where
     None
 }
 
+pub fn set_node_by_id_force<T>(
+    root: &mut Node<T>,
+    node_to_set: &Node<T>,
+    id: usize,
+) where
+    T:  Clone + Default  ,
+{
+    if root.id == id {
+        return
+    }
+
+    let mut que: VecDeque<&mut Node<T>> = VecDeque::new();
+    que.push_front(root);
+
+    while let Some(node) = que.pop_back() {
+        for child in node.children.iter_mut() {
+            if child.id == id {
+                child.value = node_to_set.value.clone();
+                return;
+            }
+            que.push_front(child);
+        }
+    }
+}
+
+
 pub fn set_node_by_id<T>(
     root: &mut Node<T>,
     node_to_set: &Node<T>,
     id: usize,
     constraints: &Nodes<T>,
 ) where
-    T: Debug + Clone + Default + PartialEq,
+    T:  Debug + Clone + Default + PartialEq,
 {
     if root.id == id {
         root.set_node(node_to_set, constraints);

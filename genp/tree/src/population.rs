@@ -9,7 +9,7 @@ use crate::{
     init::{get_test_tree, get_test_tree_with},
     nodes::{
         get_node_by_id, get_node_count, set_node_by_id, set_single_node_by_id,
-        set_subtree_by_node_id, Node, Nodes,
+        set_subtree_by_node_id, Node, Nodes, set_node_by_id_force,
     },
     settings::Settings,
 };
@@ -121,7 +121,7 @@ where
 
 impl<T> Generation<T>
 where
-    T: Copy + Clone + Default,
+    T: Copy + Clone + Default + Debug + PartialEq ,
 {
     pub fn new(size: usize) -> Generation<T> {
         Generation {
@@ -160,6 +160,35 @@ where
         inds.into_iter()
             .take((self.size as f64 * percentage) as usize)
             .collect()
+    }
+
+    pub fn mutate(&mut self, setting: &Settings, nodes: &Nodes<T>){
+        let mut val: i32;
+        let mut s_val: i32;
+        let m_rate : i32  = (setting.population.mutation_rate * 100.0) as i32;
+        for i in 0..self.individuals.len(){
+            val = thread_rng().gen_range(0..100) ;
+            s_val = thread_rng().gen_range(0..100) ;
+
+            if val < m_rate{
+                let end = get_node_count(&self.individuals[i].chromosome);
+                let id = thread_rng().gen_range(0..end);
+                if s_val > 50{
+                    self.individuals[i].chromosome = self.individuals[i].mutate(id);
+                } else if s_val >= 25{
+                    let children = self.individuals[i].chromosome.children.clone();
+                    self.individuals[i].chromosome.children = children.into_iter().filter(|x| x.id != id).collect();
+                } else if s_val < 25 && self.individuals[i].chromosome.children.len() < setting.population.tree_width {
+                    let mut rng = rand::thread_rng();
+                    if let Some(add_val) = nodes.leafs.choose(&mut rng) {
+                        let mut new_node: Node<T> = Node::new(end + 1);
+                        new_node.value = *add_val;
+                        self.individuals[i].chromosome.children.push(new_node);
+                    }
+
+                }
+            }
+        }
     }
 
     pub fn set_fitness_percentages(&mut self) {
@@ -203,6 +232,9 @@ where
         let split_at = (self.size - (self.size as f64 * elite_percentage) as usize);
         next_gen.split_off(split_at);
         next_gen.append(&mut elites);
+
+
+
         // maybe a new generation should be returned instead
         self.individuals = next_gen;
     }
@@ -222,7 +254,7 @@ pub struct Individual<T> {
 
 impl<T> Individual<T>
 where
-    T: Default,
+    T: Default + Clone  ,
 {
     pub fn new(chromosome: Node<T>) -> Self {
         Self {
@@ -231,8 +263,12 @@ where
         }
     }
 
-    pub fn mutate(&mut self, mutation: fn(&Individual<T>) -> Individual<T>) -> Self {
-        mutation(self)
+    pub fn mutate(&mut self, id: usize) -> Node<T> {
+        let constraints = get_nodes();
+        let boxed: Box<Node<T>> = Box::new(self.chromosome.clone());
+        let res1 = get_node_by_id(&boxed, id);
+        set_node_by_id_force(&mut self.chromosome, &res1.unwrap(), id);
+        self.chromosome.clone()
     }
 }
 

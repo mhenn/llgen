@@ -1,12 +1,11 @@
 use std::{fmt::Debug, time, thread};
 
-
 use crate::{
     constraints::get_nodes,
     init::{ramped_half_half, get_xml_delims, write_to_file, write_bt_to_file},
     nodes::Nodes,
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune}, parse::parse_points,
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune, exec_wait_bt}, parse::parse_points,
 };
 
 pub fn evolution_cycle<T>(
@@ -21,7 +20,7 @@ pub fn evolution_cycle<T>(
     combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
     selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
 ) where
-    T: Copy + Clone + Default + Debug,
+    T: Copy + Clone + Default + Debug + PartialEq,
 {
     let mut count = 0;
     //Todo: settings & get_nodes
@@ -33,16 +32,16 @@ pub fn evolution_cycle<T>(
             break;
         }
 
-
     pop.populate(nodes, &settings, init);
     evaluate(&mut pop.individuals, count as u32);
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
+    pop.mutate(&settings, &nodes);
     count += 1;
     }
 }
 
-pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
+pub fn evaluate_ref<T>(inds: &mut Vec<Individual<T>>, id: u32)
     where
     T: Default + Copy,
     String: From<T>
@@ -60,18 +59,50 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
         write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
         docker_start();
         thread::sleep(fiver);
-        let mut handle = execute_BT().unwrap();
+        let mut handle = execute_BT();
         thread::sleep(thirty);
-        handle.kill();
         kill_BT();
         docker_copy();
         stop_refbox();
         write_result("./output/".to_owned() + &cur_id);
-        let points = parse_points("./output/".to_owned() + &cur_id);
+        let points = parse_points("./output/".to_owned() + &cur_id) ;
         individual.fitness = points as f64;
         docker_kill_all();
     }
 }
+
+pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
+    where
+    T: Default + Copy+ Debug,
+    String: From<T>
+{
+    let mut ind_id: u32 = 0;
+    for individual in inds.iter_mut() {
+        let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
+        ind_id += 1;
+        let chrom = &individual.chromosome;
+        let xml: String = node_to_xml_string(chrom, &get_xml_delims());
+        write_bt_to_file(&xml, "../xml/generated.xml".to_string());
+        write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
+        let mut out = exec_wait_bt().unwrap();
+        let out = String::from_utf8(out.stdout).unwrap();
+        let points = handle_points(out);
+        if points > 30 {
+            println!("{:?}", cur_id);
+        }
+        individual.fitness = points as f64;
+        write_to_file(points.to_string() ,"./output/".to_owned() + &cur_id)
+    }
+}
+
+pub fn handle_points(out: String) -> i32{
+    let mut out: Vec<&str> = out.split('\n').into_iter().collect();
+    out.retain(|a| a != &"");
+    let mut sum: Vec<i32> = out.into_iter().map(|a| a.parse::<i32>().unwrap()).collect();
+    sum = sum.into_iter().map(|a| if a < 0 { 0} else {a}).collect();
+    sum.into_iter().reduce(|a,b| a+b).unwrap()
+}
+
 pub fn crop<T>(pop_fitness: f64, ind: &Individual<T>) -> bool {
     ind.fitness > pop_fitness
 }
@@ -88,32 +119,25 @@ use std::time::{ Instant};
 #[test]
 fn evolve() {
     let nodes = get_nodes();
-        let start = Instant::now();
     evolution_cycle(
-        25,
+        100,
         ramped_half_half,
         &nodes,
-        25,
-        0.1,
+        100,
+        0.25,
         evaluate,
         tree_crossover,
         roulette_wheel,
     );
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
     assert!(false);
 }
 
 //#[test]
 fn eval_test(){
-
     let nodes = get_nodes();
     let settings = Settings::new().unwrap();
     let mut pop = Generation::new(4);
     pop.populate(&nodes, &settings, ramped_half_half);
-    println!("Before {:?}", pop.individuals.get(0).unwrap().fitness);
     evaluate(&mut pop.individuals, 0);
-    println!("After {:?}", pop.individuals.get(0).unwrap().fitness);
     assert!(false)
-
 }

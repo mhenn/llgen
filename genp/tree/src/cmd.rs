@@ -24,6 +24,16 @@ pub fn execute_BT() -> Result<Child, std::io::Error>  {
         .spawn()
 }
 
+pub fn exec_wait_bt() -> Result<std::process::Output, std::io::Error>    {
+
+    Command::new("sh")
+        .arg("-c")
+        .arg("../../behavior/build/BTRCLL")
+        .output()
+}
+
+
+
 pub fn kill_BT(){
     Command::new("sh")
         .arg("-c")
