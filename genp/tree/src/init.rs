@@ -78,6 +78,7 @@ where
                 chromosome: tree,
                 fitness: 0.0,
                 fitness_percentage: 0.0,
+                elite: false,
                 //       id: x,
             });
         }

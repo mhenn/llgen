@@ -159,7 +159,20 @@ where
         let inds = self.individuals.clone();
         inds.into_iter()
             .take((self.size as f64 * percentage) as usize)
+            .map(|mut x| {x.elite = true; x.chromosome = self.deep_cp(&x); x})
             .collect()
+    }
+
+    pub fn deep_cp(&mut self, unit: &Individual<T>) -> Node<T>{
+        let mut node = Node::new(unit.chromosome.id);
+        node.value = unit.chromosome.value;
+        for i in 0..unit.chromosome.children.len(){
+            let ind = unit.chromosome.children[i].clone();
+            let mut child  = Node::new(ind.id);
+            child.value = ind.value;
+            node.children.push(child);
+        }
+        node
     }
 
     pub fn mutate(&mut self, setting: &Settings, nodes: &Nodes<T>){
@@ -170,23 +183,28 @@ where
             val = thread_rng().gen_range(0..100) ;
             s_val = thread_rng().gen_range(0..100) ;
 
-            if val < m_rate{
+            if val < m_rate && !self.individuals[i].elite{
                 let end = get_node_count(&self.individuals[i].chromosome);
                 let id = thread_rng().gen_range(0..end);
                 if s_val > 50{
                     self.individuals[i].chromosome = self.individuals[i].mutate(id);
-                } else if s_val >= 25{
-                    let children = self.individuals[i].chromosome.children.clone();
-                    self.individuals[i].chromosome.children = children.into_iter().filter(|x| x.id != id).collect();
-                } else if s_val < 25 && self.individuals[i].chromosome.children.len() < setting.population.tree_width {
-                    let mut rng = rand::thread_rng();
-                    if let Some(add_val) = nodes.leafs.choose(&mut rng) {
-                        let mut new_node: Node<T> = Node::new(end + 1);
-                        new_node.value = *add_val;
-                        self.individuals[i].chromosome.children.push(new_node);
-                    }
+                }else {
+                    self.individuals[i].chromosome.children.shuffle(&mut thread_rng());
 
-                }
+
+
+               // } else if s_val >= 25{
+               //     let children = self.individuals[i].chromosome.children.clone();
+               //     self.individuals[i].chromosome.children = children.into_iter().filter(|x| x.id != id).collect();
+               // } else if s_val < 25 && self.individuals[i].chromosome.children.len() < setting.population.tree_width {
+               //     let mut rng = rand::thread_rng();
+               //     if let Some(add_val) = nodes.leafs.choose(&mut rng) {
+               //         let mut new_node: Node<T> = Node::new(end + 1);
+               //         new_node.value = *add_val;
+               //         self.individuals[i].chromosome.children.push(new_node);
+               //     }
+
+               }
             }
         }
     }
@@ -209,11 +227,12 @@ where
         offspring: usize,
         combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
         selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
+        inds: Vec<Individual<T>>
     ) -> Vec<Individual<T>> {
         let end = self.size / offspring;
         let mut new_inds: Vec<Individual<T>> =  vec![];
         for _ in 0..end {
-            let parents = selection(&self.individuals);
+            let parents = selection(&inds);
             new_inds.append(&mut combine(parents.first, parents.second, offspring));
         }
         new_inds
@@ -227,12 +246,17 @@ where
         elite_percentage: f64,
     ) {
         self.sort_by_fitness();
-        let mut elites = self.select_elites(elite_percentage);
-        let mut next_gen = self.crossover(offspring, combine, selection);
+
         let split_at = (self.size - (self.size as f64 * elite_percentage) as usize);
+
+        let mut elites = self.select_elites(elite_percentage);
+        let mut inds = self.individuals.clone();
+        inds.split_off(inds.len()/2);
+        let mut sec = inds.clone();
+        inds.append(&mut sec);
+        let mut next_gen = self.crossover(offspring, combine, selection, inds);
         next_gen.split_off(split_at);
         next_gen.append(&mut elites);
-
 
 
         // maybe a new generation should be returned instead
@@ -250,6 +274,7 @@ pub struct Individual<T> {
     pub chromosome: Node<T>,
     pub fitness: f64,
     pub fitness_percentage: f64,
+    pub elite : bool
 }
 
 impl<T> Individual<T>
