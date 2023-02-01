@@ -2,6 +2,9 @@ use std::{process::{Command, Child}, error::Error};
 
 use crate::init::{write_to_file };
 
+
+
+
 pub fn docker_start(){
     let output = Command::new("sh")
         .arg("-c")

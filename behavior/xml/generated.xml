@@ -1,10 +1,10 @@
 <root>
      <BehaviorTree ID="GP">
-        <Sequence name="main">
-            <RetrieveCap />
-            <GetBase />
-            <MountCap />
-            <Action ID="DELIVER"/>
-        </Sequence>
+            <Sequence name="rootseq">
+                <Action ID="RETRIEVE"/>
+                <Action ID="GETBASE"/>
+                <Action ID="MOUNT"/>
+                <Action ID="DELIVER"/>
+            </Sequence>
      </BehaviorTree>
  </root>

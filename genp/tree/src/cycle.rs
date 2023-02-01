@@ -14,10 +14,11 @@ pub fn evolution_cycle<T>(
     nodes: &Nodes<T>,
     pop_size: usize,
     elite_percentage: f64,
-    evaluate: fn(&mut Vec<Individual<T>>, id: u32, name: String),
+    evaluate: fn(&mut Vec<Individual<T>>, id: u32),
+    //    crop: fn(f64, &Individual<T>) -> bool,
+    //    mutation: fn(&Individual<T>) -> Individual<T>,
     combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
     selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
-    name: String
 ) where
     T: Copy + Clone + Default + Debug + PartialEq,
 {
@@ -31,7 +32,7 @@ pub fn evolution_cycle<T>(
             break;
         }
 
-    evaluate(&mut pop.individuals, count as u32, name.clone());
+    evaluate(&mut pop.individuals, count as u32);
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
     pop.mutate(&settings, nodes);
@@ -69,7 +70,7 @@ pub fn evaluate_ref<T>(inds: &mut Vec<Individual<T>>, id: u32)
     }
 }
 
-pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32, name: String)
+pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
     where
     T: Default + Copy+ Debug,
     String: From<T>
@@ -82,7 +83,7 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32, name: String)
 //        let count = get_node_count(chrom);
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
         write_bt_to_file(&xml, "../xml/generated.xml".to_string());
-        write_bt_to_file(&xml, "./run_results/".to_owned() + &name + "/xml/" + &cur_id  );
+        write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
         let mut out = exec_wait_bt().unwrap();
         let out = String::from_utf8(out.stdout).unwrap();
         let points = handle_points(out);
@@ -92,7 +93,7 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32, name: String)
         }
 
         individual.fitness = points as f64;
-        write_to_file(points.to_string() ,"./run_results/".to_owned() + &name + "/points/" + &cur_id)
+        write_to_file(points.to_string() ,"./output/".to_owned() + &cur_id)
     }
 }
 
@@ -121,15 +122,14 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        50,
+        100,
         ramped_half_half,
         &nodes,
-        10,
+        100,
         0.10,
         evaluate,
         tree_crossover,
         roulette_wheel,
-        "50_10".to_string()
     );
     assert!(false);
 }
@@ -140,6 +140,6 @@ fn eval_test(){
     let settings = Settings::new().unwrap();
     let mut pop = Generation::new(4);
     pop.populate(&nodes, &settings, ramped_half_half);
-    evaluate(&mut pop.individuals, 0, "aids".to_string());
+    evaluate(&mut pop.individuals, 0);
     assert!(false)
 }
