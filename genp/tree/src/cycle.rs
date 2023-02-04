@@ -31,8 +31,17 @@ pub fn evolution_cycle<T>(
         if count == cycles{
             break;
         }
+        println!("START");
 
+    for i in 0..pop.individuals.len(){
+        println!("{:?}", pop.individuals[i].fitness);
+    }
+        println!("BREAK");
     evaluate(&mut pop.individuals, count as u32);
+
+    for i in 0..pop.individuals.len(){
+        println!("{:?}", pop.individuals[i].fitness);
+    }
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
     pop.mutate(&settings, nodes);
@@ -122,12 +131,13 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        100,
+        25,
         ramped_half_half,
         &nodes,
-        100,
+        20,
         0.10,
-        evaluate,
+//        evaluate,
+        evaluate_ref,
         tree_crossover,
         roulette_wheel,
     );
