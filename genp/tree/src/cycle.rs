@@ -63,8 +63,8 @@ pub fn evaluate_ref<T>(inds: &mut Vec<Individual<T>>, id: u32)
         ind_id += 1;
         let chrom = &individual.chromosome;
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
-        write_bt_to_file(&xml, "../xml/generated.xml".to_string());
-        write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
+        //write_bt_to_file(&xml, "../xml/generated.xml".to_string());
+        //write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
         docker_start();
         thread::sleep(fiver);
         let mut handle = execute_BT();
@@ -131,10 +131,10 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        25,
+        1,
         ramped_half_half,
         &nodes,
-        20,
+        100,
         0.10,
 //        evaluate,
         evaluate_ref,
