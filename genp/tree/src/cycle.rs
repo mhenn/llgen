@@ -31,17 +31,7 @@ pub fn evolution_cycle<T>(
         if count == cycles{
             break;
         }
-        println!("START");
-
-    for i in 0..pop.individuals.len(){
-        println!("{:?}", pop.individuals[i].fitness);
-    }
-        println!("BREAK");
     evaluate(&mut pop.individuals, count as u32);
-
-    for i in 0..pop.individuals.len(){
-        println!("{:?}", pop.individuals[i].fitness);
-    }
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
     pop.mutate(&settings, nodes);
@@ -63,8 +53,8 @@ pub fn evaluate_ref<T>(inds: &mut Vec<Individual<T>>, id: u32)
         ind_id += 1;
         let chrom = &individual.chromosome;
         let xml: String = node_to_xml_string(chrom, &get_xml_delims());
-        //write_bt_to_file(&xml, "../xml/generated.xml".to_string());
-        //write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
+        write_bt_to_file(&xml, "../xml/generated.xml".to_string());
+        write_bt_to_file(&xml, "./log/".to_owned()+ &cur_id  );
         docker_start();
         thread::sleep(fiver);
         let mut handle = execute_BT();
@@ -97,9 +87,6 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
         let out = String::from_utf8(out.stdout).unwrap();
         let points = handle_points(out);
 
-        if points > 30 {
-            println!("{:?}", cur_id);
-        }
 
         individual.fitness = points as f64;
         write_to_file(points.to_string() ,"./output/".to_owned() + &cur_id)
@@ -131,13 +118,12 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        1,
+        100,
         ramped_half_half,
         &nodes,
-        100,
+        25,
         0.10,
-//        evaluate,
-        evaluate_ref,
+        evaluate,
         tree_crossover,
         roulette_wheel,
     );

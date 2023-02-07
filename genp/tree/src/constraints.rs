@@ -34,15 +34,15 @@ pub fn intermediates<'a>() -> Vec<IntermediateNode<&'a str>> {
     ]
 }
 
-//pub fn leafs<'a>() -> Vec<&'a str> {
-//    vec!["Action ID='RETRIEVE'", "Action ID='GETBASE'",
-//    "Action ID='MOUNT'", "Action ID='DELIVER'"]
-//}
-
 pub fn leafs<'a>() -> Vec<&'a str> {
-    vec!["RetrieveCap", "GetBase",
-    "MountCap", "Action ID='DELIVER'"]
+    vec!["Action ID='RETRIEVE'", "Action ID='GETBASE'",
+    "Action ID='MOUNT'", "Action ID='DELIVER'"]
 }
+
+//pub fn leafs<'a>() -> Vec<&'a str> {
+//    vec!["RetrieveCap", "GetBase",
+//    "MountCap", "Action ID='DELIVER'"]
+//}
 pub fn get_delim<'a>() -> (&'a str, &'a str) {
     ("(", ")")
 }
