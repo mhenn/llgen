@@ -118,7 +118,7 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        100,
+        10,
         ramped_half_half,
         &nodes,
         10,
