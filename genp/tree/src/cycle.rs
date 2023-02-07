@@ -118,10 +118,10 @@ use std::time::{ Instant};
 fn evolve() {
     let nodes = get_nodes();
     evolution_cycle(
-        50,
+        100,
         ramped_half_half,
         &nodes,
-        100,
+        10,
         0.10,
         evaluate,
         tree_crossover,
