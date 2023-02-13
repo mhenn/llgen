@@ -175,9 +175,10 @@ where
         node
     }
 
-    pub fn mutate(&mut self, setting: &Settings, nodes: &Nodes<T>){
+    pub fn mutate(&mut self, setting: &Settings, nodes: &Nodes<T>, mut_rate: f64){
         let mut val: i32;
         let mut s_val: i32;
+//        let m_rate : i32  = (setting.population.mutation_rate * 100.0) as i32;
         let m_rate : i32  = (setting.population.mutation_rate * 100.0) as i32;
         for i in 0..self.individuals.len(){
             val = thread_rng().gen_range(0..100) ;

@@ -5,7 +5,7 @@ use crate::{
     init::{ramped_half_half, get_xml_delims, write_to_file, write_bt_to_file},
     nodes::{Nodes, get_node_count},
     population::{roulette_wheel, tree_crossover, Generation, Individual, IndividualTuple},
-    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune, exec_wait_bt}, parse::parse_points,
+    settings::Settings, xml::node_to_xml_string, cmd::{docker_start, execute_BT, write_result, docker_kill_all, kill_BT, stop_refbox, docker_copy, docker_prune, exec_wait_bt, create_dirs, move_it, clean_it}, parse::parse_points,
 };
 
 pub fn evolution_cycle<T>(
@@ -19,6 +19,7 @@ pub fn evolution_cycle<T>(
     //    mutation: fn(&Individual<T>) -> Individual<T>,
     combine: fn(Individual<T>, Individual<T>, usize) -> Vec<Individual<T>>,
     selection: fn(&Vec<Individual<T>>) -> IndividualTuple<T>,
+    m_rate: f64,
 ) where
     T: Copy + Clone + Default + Debug + PartialEq,
 {
@@ -34,7 +35,7 @@ pub fn evolution_cycle<T>(
     evaluate(&mut pop.individuals, count as u32);
     pop.set_fitness_percentages();
     pop.handle_generation_update(2, combine, selection, elite_percentage);
-    pop.mutate(&settings, nodes);
+    pop.mutate(&settings, nodes,m_rate);
     count += 1;
     }
 }
@@ -93,6 +94,28 @@ pub fn evaluate<T>(inds: &mut Vec<Individual<T>>, id: u32)
     }
 }
 
+pub fn evaluate_dwa<T>(inds: &mut Vec<Individual<T>>, id: u32)
+    where
+    T: Default + Copy+ Debug,
+    String: From<T>
+{
+    let mut ind_id: u32 = 0;
+    for individual in inds.iter_mut() {
+        let cur_id : String = "gen_".to_owned() + &id.to_string() +"_ind_" + &ind_id.to_string();
+        ind_id += 1;
+        let chrom = &individual.chromosome;
+        let xml: String = node_to_xml_string(chrom, &get_xml_delims());
+        write_bt_to_file(&xml, "../xml/generated.xml".to_string());
+        let mut out = exec_wait_bt().unwrap();
+        let out = String::from_utf8(out.stdout).unwrap();
+        let points = handle_points(out);
+
+        individual.fitness = points as f64;
+        write_to_file(points.to_string() ,"./output/".to_owned() + &cur_id)
+    }
+}
+
+
 pub fn handle_points(out: String) -> i32{
     let mut out: Vec<&str> = out.split('\n').into_iter().collect();
     out.retain(|a| a != &"");
@@ -114,21 +137,50 @@ fn ramped_hh() {
 
 use std::time::{ Instant};
 
+//#[test]
+//fn evolve() {
+//    let nodes = get_nodes();
+//    evolution_cycle(
+//        25,
+//        ramped_half_half,
+//        &nodes,
+//        25,
+//        0.10,
+//        evaluate,
+//        tree_crossover,
+//        roulette_wheel,
+//    );
+//    assert!(false);
+//}
+
 #[test]
-fn evolve() {
+fn evolve_sensitive() {
     let nodes = get_nodes();
+    for el in [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]{
+        for mr in [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]{
+            for reps in [0,1,2,3,4]{
+    let name : String = format!("el_{}_mr_{}_{}", el * 10., mr *10., reps);
+    create_dirs(name.clone());
     evolution_cycle(
-        25,
+        20,
         ramped_half_half,
         &nodes,
-        25,
-        0.10,
-        evaluate,
+        20,
+        el,
+        evaluate_dwa,
         tree_crossover,
         roulette_wheel,
+        mr
     );
+    move_it(name);
+    clean_it();
+            }
+        }
+    }
     assert!(false);
 }
+
+
 
 //#[test]
 fn eval_test(){

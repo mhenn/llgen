@@ -2,8 +2,38 @@ use std::{process::{Command, Child}, error::Error};
 
 use crate::init::{write_to_file };
 
+pub fn clean_it(){
 
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("rm  -rf output/*")
+        .output();
+     Command::new("sh")
+        .arg("-c")
+        .arg("rm  -rf output/*")
+        .output();
+}
 
+pub fn create_dirs(name: String){
+
+    Command::new("sh")
+        .arg("-c")
+        .arg("mkdir /sensitive/".to_owned() + &name)
+        .output();
+
+    Command::new("sh")
+        .arg("-c")
+        .arg("mkdir /sensitive/".to_owned() + &name + "/output")
+        .output();
+}
+
+pub fn move_it(name: String){
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("cp -r output  sensitive/".to_owned() + &name)
+        .output();
+
+}
 
 pub fn docker_start(){
     let output = Command::new("sh")
